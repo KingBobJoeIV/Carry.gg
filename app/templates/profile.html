@@ -46,8 +46,12 @@
             <h1>{{ ign }} is not in game!</h1>
         {% endif %}
         <h2>Past Predictions:</h2>
+        <p color="red">todo fix container/text alignment + prediction issues(double clicking, 404 page etc)</p>
+        {% if not pred %}
+            <p>No Predictions?</p>
+            <img src="https://github.com/InFinity54/LoL_DDragon/blob/master/extras/sticker/poro-sweat.png?raw=true" style="width: 50%; height: 50%">
+        {% endif %}
         <ol style="list-style: none">
-                <p color="red">todo fix container/text alignment </p>
                 {% for row in pred %}
                     <li class="game_container" style="background-color: {{ row[6] }}">
                         <div class="game_metadata">
@@ -92,7 +96,7 @@
             document.getElementById("mastery_points").hidden = true;
         } else {
             document.getElementById("mastery").hidden = false;
-            document.getElementById("champImage").style.opacity = '.5';
+            document.getElementById("champImage").style.opacity = '.2';
             document.getElementById("mastery_points").hidden = false;
         }
     }
