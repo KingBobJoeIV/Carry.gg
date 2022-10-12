@@ -42,18 +42,19 @@
         {% if not hide %}
             <form action="/predict/profile/{{ ign }}">
             <input type="hidden" name="_in_game"  value="1"/>
-                <button id="predictBtn" type="submit" color="green" onclick="predictLiveGame();">Predict Live Game!</button>
+                <button id="predictBtn" type="submit">Predict Live Game!</button>
             </form>
         {% else %}
             <h1>{{ ign }} is not in game!</h1>
         {% endif %}
         <h2>Past Predictions:</h2>
-        <p color="red">todo fix container/text alignment + prediction issues(double clicking, 404 page etc) + champ quotes?</p>
+        <p color="red">todo fix prediction issues(double clicking, 404 page etc) + champ quotes?</p>
         {% if not pred %}
             <p>No Predictions?</p>
             <img src="https://github.com/InFinity54/LoL_DDragon/blob/master/extras/sticker/poro-sweat.png?raw=true" style="width: 25%; height: 25%">
         {% endif %}
-        <ol style="list-style: none">
+        <div class="predictions">
+            <ol style="list-style: none">
                 {% for row in pred %}
                     <li class="game_container" style="background-color: {{ row[6] }}">
                         <div class="game_metadata">
@@ -87,6 +88,7 @@
                     </li>
                 {%  endfor %}
             </ol>
+        </div>
     </div>
 </body>
 <script>

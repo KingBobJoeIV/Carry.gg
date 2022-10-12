@@ -60,7 +60,7 @@ def profile_page(ign):
         # # need to check top element on 1 second intervals
         # if ign not in cache:
         #     predict(ign)
-        #     cache[ign] = currentTime + 2 min
+        #     cache[live_match_id] = currentTime + 2 min
         #     hide = True
         # else:
         #     # popup saying request already in progress/complete

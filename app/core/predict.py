@@ -109,7 +109,7 @@ def predict(ign):
         counter += 1
         # fetch time of one participant
         print(curr_acc_info.name + "'s games fetched at: " + str(datetime.datetime.fromtimestamp(time.time())))
-    print(type(curr_match["gameId"]))
+    # print(type(curr_match["gameId"]))
     scores = compare_teams.compare_teams(str(curr_match["gameId"]), team1, team2, team1_ranks, team2_ranks)
     print("gameId:", scores[0])
     print("Team 1:", team1_members)

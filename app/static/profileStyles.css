@@ -87,40 +87,40 @@ body {
     height: 105%;
     width: 90%;
 }
-
+.predictions {
+    position: absolute;
+    left: 38%;
+    display: flex;
+}
 .game_container {
-    width: 50%;
-    height: 10vw;
+    display: flex;
+    /*width: 50%;*/
+    /*height: 10vw;*/
+    flex-grow: 1;
     justify-content: center;
     border: 5px solid black;
     border-radius: 10px;
 }
 
 .game_metadata {
-    position: absolute;
-    text-align: center;
+    flex-grow: 1;
 }
 
 .game_predict_info {
-    position: absolute;
-    left: 25%;
+    flex-grow: 1;
 }
 
 .game_player_info {
-    position: absolute;
-    right: 57%;
+    display: flex;
+    flex-grow: 2;
 }
 
 .game_team_1_info {
-    position: absolute;
-    width: auto;
-    right: 100%;
+    flex-grow: 1;
 }
 
 .game_team_2_info {
-    position: absolute;
-    width: auto;
-    left: 50%;
+    flex-grow: 1;
 }
 
 a {
