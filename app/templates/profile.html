@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+{
+    "tier": {{ tier }}
+
+}
+<head>
+    <link rel="stylesheet" href="/static/profileStyles.css" />
+    <meta charset="UTF-8">
+    <title>Profile</title>
+</head>
+<body>
+    <div class="sidebar">
+        <h1>{{ ign }}</h1>
+        <div class="space"></div>
+        <div class="icon_border_stack">
+            <img class="icon" src="https://ddragon.leagueoflegends.com/cdn/12.19.1/img/profileicon/{{ icon }}.png" alt="icon" />
+            <img class="level_border" src="../../static/images/Level_{{ img_level }}_Summoner_Icon_Border.png"/>
+            <div class="level">{{ level }}</div>
+        </div>
+        <div class="space"></div>
+        // todo click to show mastery stuff, do all iron4-d1 borders
+        <div class="skin_border_stack">
+            <img src="https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{{ championName }}_{{ skin }}.jpg" alt="" id="champImage"/>
+            {% if tier != "UNRANKED" %}
+                <img class="rank_border" src="../../static/images/{{ tier }}_{{ rank }}.png" onclick="changeImage()"/>
+            {% endif %}
+        </div>
+        <div class="space"></div>
+        <p>{{ tier }} {{ rank }}</p>
+        {% if tier != "UNRANKED" %}
+            <p>{{ leaguePoints }}lp</p>
+        {%  endif %}
+        <p>Wins: {{ wins }} Losses: {{ losses }}</p>
+        <p><a href="https://www.op.gg/summoners/na/{{ ign }}" target="_blank">op.gg</a></p>
+    </div>
+    <div class="main">
+        <p id="hid" hidden="hidden">{{ hidden }}</p>
+        {% if not hide %}
+            <form action="/predict/profile/{{ ign }}">
+            <input type="hidden" name="_in_game"  value="1"/>
+                <button id="predictBtn" type="submit" color="green" onclick="predictLiveGame();">Predict Live Game!</button>
+            </form>
+        {% else %}
+            <h1>{{ ign }} is not in game!</h1>
+        {% endif %}
+        <h2>Past Predictions:</h2>
+        <ol style="list-style: none">
+                <p color="red">todo fix container/text alignment </p>
+                {% for row in pred %}
+                    <li class="game_container" style="background-color: {{ row[6] }}">
+                        <div class="game_metadata">
+                            <p> Game Info</p>
+                            <p>{{ row[0][0] }}</p>
+                            <p>{{ row[0][1] }}</p>
+                        </div>
+                        <div class="game_predict_info">
+                            <p>Predicted Winner: {{ row[3] }}</p>
+                            <p>Actual Winner: {{ row[4] }}</p>
+                            <p>Predicted Chance: {{ row[5] }}</p>
+                        </div>
+                        <div class="game_player_info">
+                            <div class="game_team_1_info">
+                                <ol style="list-style: none">
+                                    Team 1:
+                                    {% for player in row[1] %}
+                                        <li> <a href="/predict/profile/{{ player }}" target="_blank">{{ player }}</a></li>
+                                    {% endfor %}
+                                </ol>
+                            </div>
+                            <div class="game_team_2_info">
+                                <ol style="list-style: none">
+                                    Team 2:
+                                    {% for player in row[2] %}
+                                        <li> <a href="/predict/profile/{{ player }}" target="_blank">{{ player }}</a></li>
+                                    {% endfor %}
+                                </ol>
+                            </div>
+                        </div>
+                    </li>
+                {%  endfor %}
+            </ol>
+    </div>
+</body>
+<script>
+    function changeImage() {
+        window.alert("here")
+        if (document.getElementById("champImage").src === "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{{ championName }}_{{ skin }}.jpg"){
+            // todo do rn
+            document.getElementById("champImage").src = "http://www.userinterfaceicons.com/80x80/maximize.png";
+        } else {
+            document.getElementById("champImage").src = "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{{ championName }}_{{ skin }}.jpg";
+        }
+    }
+</script>
+</html>
+

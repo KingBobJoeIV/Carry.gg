@@ -6,6 +6,7 @@ IS_PROD = environ.get("IS_PROD") is not None
 
 if not IS_PROD:
     print("assuming dev environment, add `IS_PROD` to your env to switch to dev")
+RIOT_API_KEY = environ.get("API_KEY")
 
 # JWT Signing key, make sure this stays same or every user will need to relogin
 SIGNING_KEY = environ.get("JWT_SIGNING_KEY")
@@ -17,10 +18,11 @@ DATABASE_URL = environ.get("DATABASE_URL").replace("postgres://", "postgresql://
 REFRESH_TOKEN_SALT = environ.get("REFRESH_TOKEN_SALT")
 DISABLE_CACHING = environ.get("DISABLE_CACHING") is not None
 try:
+    raise Exception()
     CACHE_DIR = Path(gettempdir(), "@cache").resolve()
     CACHE_DIR.mkdir(exist_ok=True)
 except:
-    CACHE_DIR = Path(path.dirname(path.realpath(__file__)), "@cache").resolve()
+    CACHE_DIR = Path(path.dirname(path.realpath(__file__)), "@_cache").resolve()
     CACHE_DIR.mkdir(exist_ok=True)
 CACHE_DIR = str(CACHE_DIR)
 print(f"[Cache] dir: {CACHE_DIR}")

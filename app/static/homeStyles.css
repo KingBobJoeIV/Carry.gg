@@ -1,0 +1,16 @@
+h1 {
+    color: darkgoldenrod;
+    font-size: x-large;
+}
+p {
+    color: darkgoldenrod;
+}
+
+.center {
+    text-align: center;
+}
+
+body {
+    background-image: url("https://github.com/InFinity54/LoL_DDragon/blob/master/extras/wallpapers/wallpaper04.png?raw=true");
+    background-size: 100%;
+}

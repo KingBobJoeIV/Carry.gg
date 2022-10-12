@@ -1,0 +1,130 @@
+p {
+    color: darkgoldenrod;
+}
+
+h1 {
+    color: darkgoldenrod;
+    font-size: 1vw;
+}
+img {
+    width: 80%;
+    height: 80%;
+}
+.sidebar {
+    text-align: center;
+    height: 100%; /* Full-height: remove this if you want "auto" height */
+    width: 15%; /* Set the width of the sidebar */
+    position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+    z-index: 1; /* Stay on top */
+    top: 0; /* Stay at the top */
+    left: 0;
+    background-color: #111; /* Black */
+    overflow-x: hidden; /* Disable horizontal scroll */
+    padding-top: 20px;
+}
+.main {
+    text-align: center;
+    margin-left: 15%; /* Same as the width of the sidebar */
+    padding: 0px 10px;
+    color: darkgoldenrod;
+}
+body {
+    background-image: url("https://github.com/InFinity54/LoL_DDragon/blob/master/extras/wallpapers/wallpaper04.png?raw=true");
+    background-size: 100%;
+}
+
+.icon {
+    border-radius: 50%;
+    width: 50%;
+    height: 50%;
+}
+
+.level_border {
+    position: absolute;
+    bottom: -15%;
+    right: -20%;
+    width: 140%;
+    height: 140%;
+    object-fit: scale-down;
+}
+.level {
+    position: absolute;
+    bottom: 8px;
+    left: 46%;
+    color: white;
+}
+
+.icon_border_stack{
+    position: relative;
+    top: 0;
+    left: 0;
+}
+
+.space {
+    padding-top: 8%;
+    padding-bottom: 8%;
+}
+.skin_border_stack {
+    position: relative;
+    top: 0;
+    left: 0;
+}
+
+.rank_border {
+    position: absolute;
+    left: 5%;
+    bottom: 0%;
+    height: 105%;
+    width: 90%;
+}
+
+.game_container {
+    width: 50%;
+    height: 10vw;
+    justify-content: center;
+    border: 5px solid black;
+    border-radius: 10px;
+}
+
+.game_metadata {
+    position: absolute;
+    text-align: center;
+}
+
+.game_predict_info {
+    position: absolute;
+    left: 25%;
+}
+
+.game_player_info {
+    position: absolute;
+    right: 57%;
+}
+
+.game_team_1_info {
+    position: absolute;
+    width: auto;
+    right: 100%;
+}
+
+.game_team_2_info {
+    position: absolute;
+    width: auto;
+    left: 50%;
+}
+
+a {
+    color: darkgoldenrod;
+}
+
+a:visited {
+    color: darkgoldenrod;
+}
+
+a:hover {
+    color: darkgoldenrod;
+}
+
+a:active {
+    color: darkgoldenrod;
+}

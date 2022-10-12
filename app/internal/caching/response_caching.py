@@ -28,7 +28,7 @@ from .safe_io import (
 from app.internal.constants import CACHE_DIR, DISABLE_CACHING
 from gc import collect
 
-DEFAULT_CACHE_TIMEOUT = 60 * 60
+DEFAULT_CACHE_TIMEOUT = 60 * 60*24*365
 DATA_SUFFIX = ".cache.json"
 
 
@@ -114,7 +114,7 @@ def cache(key_method, timeout=DEFAULT_CACHE_TIMEOUT, json_cache: bool = False):
             )
             has_cache = get_cache(key, timeout)
             if has_cache:
-                print("Cache hit:", key)
+                # print("Cache hit:", key)
                 if json_cache:
                     try:
                         return loads(Path(has_cache).read_text())["data"]
@@ -123,10 +123,10 @@ def cache(key_method, timeout=DEFAULT_CACHE_TIMEOUT, json_cache: bool = False):
                 else:
                     resp = get_cache_response(has_cache)
                     return resp
-            print("Cache miss:", key)
+            # print("Cache miss:", key)
             result = func(*args, **kwargs)
             cache_data(key, result)
-            print("gc:", collect())
+            (collect())
             return result
 
         return flask_cache

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="/static/homeStyles.css" />
+    <title>
+        Carry.gg
+    </title>
+</head>
+<body>
+<div class="center">
+    <h1 style="font-size: xxx-large">Carry.gg</h1>
+    <p style="font-size: xx-large;">Predict the outcome of a live LoL game.</p>
+    <input type="text" placeholder="Enter your IGN (NA)" id="myInput">
+    <button type="button" onclick="search();">Search</button>
+</div>
+
+</body>
+</html>
+<script>
+    function search(){
+        // Selecting the input element and get its value
+        var inputVal = document.getElementById("myInput").value;
+        // search for that url
+        var url = "/predict/profile/" + inputVal;
+        window.location.href = url;
+    }
+</script>

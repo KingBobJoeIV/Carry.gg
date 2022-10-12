@@ -6,7 +6,7 @@ from app.internal.constants import DATABASE_URL, IS_PROD
 from app.internal.helpers import ip_resolver
 from app.internal.helpers.client_errors import method_not_allowed, not_found
 from app.middlewares import Middleware, cors, process_time
-from app.routes import common, user
+from app.routes import common,predict
 
 app = Flask(__name__)
 
@@ -24,7 +24,7 @@ def gate_check():
 
 
 app.register_blueprint(common.router)
-app.register_blueprint(user.router)
+app.register_blueprint(predict.router)
 
 app.register_error_handler(404, not_found)
 app.register_error_handler(405, method_not_allowed)
