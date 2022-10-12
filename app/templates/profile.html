@@ -19,12 +19,13 @@
             <div class="level">{{ level }}</div>
         </div>
         <div class="space"></div>
-        // todo click to show mastery stuff, do all iron4-d1 borders
-        <div class="skin_border_stack">
+        <div class="skin_border_mastery_stack">
             <img src="https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{{ championName }}_{{ skin }}.jpg" alt="" id="champImage"/>
             {% if tier != "UNRANKED" %}
                 <img class="rank_border" src="../../static/images/{{ tier }}_{{ rank }}.png" onclick="changeImage()"/>
             {% endif %}
+            <img class="mastery" id="mastery" src="https://github.com/InFinity54/LoL_DDragon/blob/master/extras/masteries/masteries{{ championLevel }}.png?raw=true" hidden="hidden">
+            <p class="mastery_points" id="mastery_points" hidden="hidden">{{ championPoints }}pts</p>
         </div>
         <div class="space"></div>
         <p>{{ tier }} {{ rank }}</p>
@@ -84,12 +85,15 @@
 </body>
 <script>
     function changeImage() {
-        window.alert("here")
-        if (document.getElementById("champImage").src === "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{{ championName }}_{{ skin }}.jpg"){
-            // todo do rn
-            document.getElementById("champImage").src = "http://www.userinterfaceicons.com/80x80/maximize.png";
+        {#window.alert("here")#}
+        if (document.getElementById("mastery").hidden === false){
+            document.getElementById("mastery").hidden = true;
+            document.getElementById("champImage").style.opacity = '1';
+            document.getElementById("mastery_points").hidden = true;
         } else {
-            document.getElementById("champImage").src = "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{{ championName }}_{{ skin }}.jpg";
+            document.getElementById("mastery").hidden = false;
+            document.getElementById("champImage").style.opacity = '.5';
+            document.getElementById("mastery_points").hidden = false;
         }
     }
 </script>

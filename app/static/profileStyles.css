@@ -64,12 +64,22 @@ body {
     padding-top: 8%;
     padding-bottom: 8%;
 }
-.skin_border_stack {
+.skin_border_mastery_stack {
     position: relative;
     top: 0;
     left: 0;
 }
-
+.mastery {
+    position: absolute;
+    left: 10%;
+    height: 50%;
+}
+.mastery_points {
+    position: absolute;
+    left: 35%;
+    bottom: 40%;
+    font-weight: bolder;
+}
 .rank_border {
     position: absolute;
     left: 5%;
