@@ -80,7 +80,7 @@ def profile_page(ign):
             if p.actualWinner == "Pending":
                 color = "#7d7d7dcc"
             elif p.predictedWinner == p.actualWinner:
-                color = "#7cd7a2cc"
+                color = "#079a3bcc"
         pred.append([game_info, team1, team2, p.predictedWinner, p.actualWinner,
                      str(round(p.predictedChance * 100, 2)) + "%", color])
 

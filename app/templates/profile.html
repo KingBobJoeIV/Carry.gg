@@ -23,6 +23,8 @@
             <img src="https://ddragon.leagueoflegends.com/cdn/img/champion/loading/{{ championName }}_{{ skin }}.jpg" alt="" id="champImage"/>
             {% if tier != "UNRANKED" %}
                 <img class="rank_border" src="../../static/images/{{ tier }}_{{ rank }}.png" onclick="changeImage()"/>
+            {% else %}
+                <img class="rank_border" src="../../static/images/UNRANKED.png" onclick="changeImage()"/>
             {% endif %}
             <img class="mastery" id="mastery" src="https://github.com/InFinity54/LoL_DDragon/blob/master/extras/masteries/masteries{{ championLevel }}.png?raw=true" hidden="hidden">
             <p class="mastery_points" id="mastery_points" hidden="hidden">{{ championPoints }}pts</p>
