@@ -80,4 +80,6 @@ def store_account_in_db(puuid):
 def determine_level_image(level):
     if 30 <= level < 50:
         return 30
+    elif level >= 500:
+        return 500
     return (level // 25) * 25
