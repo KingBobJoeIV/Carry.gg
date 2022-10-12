@@ -54,6 +54,16 @@ def profile_page(ign):
     if request.args.get("_in_game"):
         predict(ign)
         hide = True
+        # todo this
+        # # declare cache somewhere? idk
+        # # need to use lru
+        # # need to check top element on 1 second intervals
+        # if ign not in cache:
+        #     predict(ign)
+        #     cache[ign] = currentTime + 2 min
+        #     hide = True
+        # else:
+        #     # popup saying request already in progress/complete
 
     prof = get_account_info.get_info_by_ign(ign)
     # past/live predictions
