@@ -7,7 +7,7 @@ from . import compare_teams
 from .watcher import lol_watcher
 from app.db import db
 from app.db.schemas import PredictInfo, AccountInfo, GameInfo, Game
-from roleidentification import pull_data, get_roles
+from app.internal.roleidentification import pull_data, get_roles
 
 
 def get_key(dict, val):
