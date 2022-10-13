@@ -9,3 +9,4 @@ pyjwt[crypto]==2.1.0
 requests==2.25.1
 SQLAlchemy==1.4.17
 riotwatcher==3.2.3
+pydantic==1.10.2
