@@ -56,7 +56,6 @@ def profile_page(ign):
     if request.args.get("_in_game"):
         t=Thread(target=predict,args=(ign,current_app._get_current_object()))
         t.start()
-
         while t.is_alive():
             yield b" "
             sleep(1)
@@ -125,7 +124,7 @@ def profile_page(ign):
                            tier=league["tier"], rank=league["rank"], leaguePoints=league["leaguePoints"],
                            wins=league["wins"], losses=league["losses"], hide=hide, pred=pred)
 
+
 @router.get("/profile/<ign>")
 def prof__page(ign):
-
     return stream_with_context(profile_page(ign))

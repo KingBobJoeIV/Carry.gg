@@ -61,7 +61,6 @@ def store_account_in_db(puuid):
     # print("Mastery for", curr["name"], "not updated!")
     # print(curr)
     league = get_rank_info(curr["id"])
-    print(league)
     if not league:
         league = []
     elif league[0]["queueType"] == "RANKED_FLEX_SR":
