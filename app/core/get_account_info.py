@@ -13,7 +13,7 @@ mapping = {}
 # todo needs to be updated every patch
 # @cache
 def map_id_to_champ():
-    f = open("/Users/manas/projects/code/carrybackend/app/ddragon_12_19_1_champ_data.json")
+    f = open("../ddragon_12_19_1_champ_data.json")
     data = json.load(f)
     for key in data["data"].keys():
         mapping[int(data["data"][key]["key"])] = data["data"][key]["id"]
