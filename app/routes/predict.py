@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request,current_app,stream_with_context
 from app.decorators.api_response import api
 from app.core.predict import predict, get_account_info
 from app.core.update import update, update_account_table
@@ -7,6 +7,8 @@ from app.core.get_match_info import check_if_in_game, calculate_game_time
 from app.imageinfo import imageinfo
 from app.db import db
 from app.db.schemas import PredictInfo, AccountInfo, GameInfo
+from threading import Thread
+from time import sleep
 import json
 router = Blueprint("predict", __name__, url_prefix="/predict")
 
@@ -41,7 +43,6 @@ def home_page():
     return render_template("home.html")
 
 
-@router.get("/profile/<ign>")
 def profile_page(ign):
     # todo change location
     mapping = get_account_info.map_id_to_champ()
@@ -51,8 +52,14 @@ def profile_page(ign):
     elif update_info == "notfound":
         return render_template("pageNotFound.html", ign=ign)
     hide = False
+    yield "<!DOCTYPE html>"
     if request.args.get("_in_game"):
-        predict(ign)
+        t=Thread(target=predict,args=(ign,current_app._get_current_object()))
+        t.start()
+
+        while t.is_alive():
+            yield b" "
+            sleep(1)
         hide = True
         # todo this
         # # declare cache somewhere? idk
@@ -112,8 +119,13 @@ def profile_page(ign):
     # determine which border image to use
     level = prof["summonerLevel"]
     img_level = determine_level_image(level)
-    return render_template("profile.html", ign=prof["name"], icon=prof["profileIconId"], img_level=img_level,
+    yield render_template("profile.html", ign=prof["name"], icon=prof["profileIconId"], img_level=img_level,
                            level=level, championName=mapping[mastery["championId"]], skin=skin,
                            championPoints=mastery["championPoints"], championLevel=mastery["championLevel"],
                            tier=league["tier"], rank=league["rank"], leaguePoints=league["leaguePoints"],
                            wins=league["wins"], losses=league["losses"], hide=hide, pred=pred)
+
+@router.get("/profile/<ign>")
+def prof__page(ign):
+
+    return stream_with_context(profile_page(ign))

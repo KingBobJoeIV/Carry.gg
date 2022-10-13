@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="en">
 {
     "tier": {{ tier }}
@@ -45,10 +45,10 @@
                 <button id="predictBtn" type="submit">Predict Live Game!</button>
             </form>
         {% else %}
-            <h1>{{ ign }} is not in game!</h1>
+            <h1 id="igbanner">{{ ign }} is not in game!</h1>
         {% endif %}
         <h2>Past Predictions:</h2>
-        <p color="red">todo fix prediction issues(double clicking, 404 page etc) + champ quotes? + display order of predictions</p>
+        <p color="red">todo fix prediction issues(double clicking, 404 page etc) + champ quotes? + display order of predictions + hide predict button</p>
         {% if not pred %}
             <p>No Predictions?</p>
             <img src="https://github.com/InFinity54/LoL_DDragon/blob/master/extras/sticker/poro-sweat.png?raw=true" style="width: 25%; height: 25%">
@@ -103,6 +103,9 @@
             document.getElementById("champImage").style.opacity = '.2';
             document.getElementById("mastery_points").hidden = false;
         }
+    }
+    if(new URLSearchParams(location.search).has("_in_game")){
+        document.querySelector("#igbanner").style.display='none'
     }
 </script>
 </html>

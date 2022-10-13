@@ -84,7 +84,8 @@ def check_if_in_game(id):
     try:
         lol_watcher.spectator.by_summoner(constants.MY_REGION, id)
         return True
-    except:
+    except Exception as e:
+        print(e)
         return False
 
 

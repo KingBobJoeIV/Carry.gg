@@ -17,7 +17,8 @@ def get_key(dict, val):
 
 
 # predict live game given username
-def predict(ign):
+def predict(ign,app):
+    app.app_context().push()
     # this is for most recent
     # # get matches of current user
     # curr_user_matches = get_match_info.get_matches(current_puuid,0)
