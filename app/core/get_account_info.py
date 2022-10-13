@@ -3,6 +3,7 @@ from .watcher import lol_watcher
 from app.db import db
 from app.db.schemas import AccountInfo
 import json
+from pathlib import Path
 from app.internal.caching.response_caching import cache
 
 
@@ -13,7 +14,9 @@ mapping = {}
 # todo needs to be updated every patch
 # @cache
 def map_id_to_champ():
-    f = open("../ddragon_12_19_1_champ_data.json")
+    p=Path("./app/ddragon_12_19_1_champ_data.json").resolve()
+    print(p)
+    f = open(p)
     data = json.load(f)
     for key in data["data"].keys():
         mapping[int(data["data"][key]["key"])] = data["data"][key]["id"]
