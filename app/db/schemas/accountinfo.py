@@ -22,6 +22,7 @@ class AccountInfo(db.Model):
     def __init__(self, summoner, mastery, league):
         self.accountId = summoner["accountId"]
         self.profileIconId = summoner["profileIconId"]
+        # replacing with last time update was called (in get_account_info)
         self.revisionDate = summoner["revisionDate"]
         self.name = summoner["name"]
         self.id = summoner["id"]

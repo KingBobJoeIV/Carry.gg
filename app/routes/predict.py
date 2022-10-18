@@ -8,7 +8,7 @@ from app.imageinfo import imageinfo
 from app.db import db
 from app.db.schemas import PredictInfo, AccountInfo, GameInfo
 from threading import Thread
-from time import sleep
+from time import sleep, time
 import json
 router = Blueprint("predict", __name__, url_prefix="/predict")
 

@@ -3,6 +3,7 @@ from . import get_account_info, get_match_info, compare_teams
 from app.db import db
 from app.db.schemas import AccountInfo, PredictInfo, GameInfo
 from . import compare_teams
+import time
 
 
 # todo need to put a rate limit per account(every 2 min); remember when last updated and compare to current time

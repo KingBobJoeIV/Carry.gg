@@ -5,6 +5,8 @@ from app.db.schemas import AccountInfo
 import json
 from pathlib import Path
 from app.internal.caching.response_caching import cache
+import time
+import math
 
 
 # todo change location
@@ -56,22 +58,33 @@ def store_account_in_db(puuid):
                       "puuid", "summonerLevel", "championId", "championPoints",
                       "championLevel", "tier", "rank", "leaguePoints", "wins", "losses"]
     curr = get_info(puuid)
-    # print("Storing:", curr["name"])
-    mastery = get_all_mastery(curr["id"])[0]
-    # print("Mastery for", curr["name"], "not updated!")
-    # print(curr)
-    league = get_rank_info(curr["id"])
-    if not league:
-        league = []
-    elif league[0]["queueType"] == "RANKED_FLEX_SR":
-        league = league[1]
-    else:
-        league = league[0]
-    row = AccountInfo(curr, mastery, league)
+    # replace revisionDate with current time
+    curr["revisionDate"] = math.floor(time.time() * 1000)
     info = AccountInfo.query.filter_by(puuid=puuid).first()
+    # print(curr["revisionDate"], info.revisionDate)
+    # print(curr["revisionDate"] - info.revisionDate)
     if not info:
+        mastery = get_all_mastery(curr["id"])[0]
+        league = get_rank_info(curr["id"])
+        if not league:
+            league = []
+        elif league[0]["queueType"] == "RANKED_FLEX_SR":
+            league = league[1]
+        else:
+            league = league[0]
+        row = AccountInfo(curr, mastery, league)
         db.session.add(row)
-    else:
+    # if it has been at least 2 minutes since last update, update info
+    elif curr["revisionDate"] - info.revisionDate > 120000:
+        mastery = get_all_mastery(curr["id"])[0]
+        league = get_rank_info(curr["id"])
+        if not league:
+            league = []
+        elif league[0]["queueType"] == "RANKED_FLEX_SR":
+            league = league[1]
+        else:
+            league = league[0]
+        row = AccountInfo(curr, mastery, league)
         print("Updating:", curr["name"])
         for field in account_fields:
             setattr(info, field, getattr(row, field))
