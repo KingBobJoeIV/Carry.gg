@@ -14,3 +14,35 @@ body {
     background-image: url("https://github.com/InFinity54/LoL_DDragon/blob/master/extras/wallpapers/wallpaper04.png?raw=true");
     background-size: 100%;
 }
+
+.recent_searches {
+    position: relative;
+    display: inline-block;
+}
+
+.recent_searches_content {
+    display: block;
+    position: absolute;
+    background-color: #f6f6f6;
+    min-width: 230px;
+    border: 1px solid #ddd;
+    z-index: 1;
+}
+
+.recent_searches_content a:hover {background-color: #f1f1f1}
+
+a {
+    color: darkgoldenrod;
+}
+
+a:visited {
+    color: darkgoldenrod;
+}
+
+a:hover {
+    color: darkgoldenrod;
+}
+
+a:active {
+    color: darkgoldenrod;
+}

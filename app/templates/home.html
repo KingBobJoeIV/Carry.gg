@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 <head>
     <link rel="stylesheet" href="/static/homeStyles.css" />
 {#    <link rel="icon" type="image/png" sizes="32x32" href="/static/android-chrome-512x512.png">#}
@@ -11,18 +11,89 @@
 <div class="center">
     <h1 style="font-size: xxx-large">Carry.gg</h1>
     <p style="font-size: xx-large;">Predict the outcome of a live LoL game.</p>
-    <input type="text" placeholder="Enter your IGN (NA)" id="myInput">
-    <button type="button" onclick="search();">Search</button>
+    <p>add recent + favorite searches using localstorage/fix search by enter </p>
+    <form>
+        <div class="recent_searches">
+            <input type="text" placeholder="Enter your IGN (NA)" id="myInput" onclick="displayRecent()"/>
+            <ul id="recent" hidden="hidden" class="recent_searches_content">
+            </ul>
+            {#        <div class="recent_searches_content" hidden="hidden" id="recent">#}
+            {#        </div>#}
+        </div>
+        <button type="submit" onclick="search(e);">Search</button>
+    </form>
+
+
 </div>
 
 </body>
 </html>
 <script>
-    function search(){
+    // get localStorage values if supported
+    if (typeof(Storage) !== "undefined") {
+        console.log(localStorage);
+        var names = [];
+        var storageLength = localStorage.length;
+        var iter = 0;
+        if (storageLength < 10) {
+            iter = storageLength;
+        } else {
+            iter = 10;
+        }
+        for (let i = iter - 1; i >= 0; i--) {
+            names.push(localStorage.getItem(i));
+        }
+        // push to invisible dropdown
+        console.log(names);
+        for (name in names) {
+            document.getElementById("recent").appendChild(createLink(names[name]));
+            console.log(names[name]);
+        }
+    }
+
+    function createLink(name) {
+        {#const li = document.createElement("li");#}
+        const a = document.createElement("a");
+        let url = "/predict/profile/" + name;
+        a.href=url;
+        a.text=name;
+        {#li.appendChild(a);#}
+        {#li.textContent = name;#}
+        {#console.log(li);#}
+        {#return li;#}
+        console.log(a);
+        return a;
+    }
+
+    function search(e){
+        e.preventDefault();
         // Selecting the input element and get its value
-        var inputVal = document.getElementById("myInput").value;
+        const inputVal = document.getElementById("myInput").value;
+        if (typeof(Storage) !== "undefined") {
+        // Store search in localStorage if supported
+            if (iter === 10) {
+                for (let i = 0; i < 9; i++) {
+                    localStorage.setItem(i, names[i + 1]);
+                }
+                localStorage.setItem("9", inputVal);
+            }
+            else {
+                for (let i = 0; i < iter; i++) {
+                    localStorage.setItem(i, names[i]);
+                }
+                localStorage.setItem(iter, inputVal);
+            }
+        }
         // search for that url
-        var url = "/predict/profile/" + inputVal;
+        const url = "/predict/profile/" + inputVal;
+        // window.alert(url);
         window.location.href = url;
     }
+
+    function displayRecent() {
+        console.log(names);
+        document.getElementById("recent").hidden = document.getElementById("recent").hidden !== true;
+
+    }
+
 </script>

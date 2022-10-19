@@ -13,7 +13,6 @@ import json
 router = Blueprint("predict", __name__, url_prefix="/predict")
 
 
-
 @router.get("/<ign>")
 @api.none
 def predict_route(ign):
@@ -47,6 +46,7 @@ def profile_page(ign):
     # todo change location
     mapping = get_account_info.map_id_to_champ()
     update_info = update(ign)
+    # todo for some reason render_template is not working
     if update_info == "toolow":
         return render_template("unranked.html", ign=ign)
     elif update_info == "notfound":
@@ -60,7 +60,7 @@ def profile_page(ign):
             yield b" "
             sleep(1)
         hide = True
-        # todo this
+        # todo this - 1/2 done, working for update need to do for predict next
         # # declare cache somewhere? idk
         # # need to use lru
         # # need to check top element on 1 second intervals
