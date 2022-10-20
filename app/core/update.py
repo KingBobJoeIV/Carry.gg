@@ -10,7 +10,8 @@ import time
 def update(ign):
     try:
         account = get_account_info.get_info_by_ign(ign)
-    except:
+    except Exception as e:
+        print(e)
         return "notfound"
     # too low level players have no profile
     if account["summonerLevel"] < 30:

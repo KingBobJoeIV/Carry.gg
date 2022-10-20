@@ -12,25 +12,25 @@ from time import sleep, time
 import json
 router = Blueprint("predict", __name__, url_prefix="/predict")
 
+# not in use
+# @router.get("/<ign>")
+# @api.none
+# def predict_route(ign):
+#     return predict(ign)
 
-@router.get("/<ign>")
-@api.none
-def predict_route(ign):
-    return predict(ign)
+# not in use
+# @router.get("/update/<ign>")
+# @api.none
+# def update_route(ign):
+#     return update(ign)
 
+# not in use
+# @router.get("/account-info/<ign>")
+# @api.none
+# def get_acc_info(ign):
+#     return get_account_info.store_account_in_db(get_account_info.get_info_by_ign(ign)["puuid"])
 
-@router.get("/update/<ign>")
-@api.none
-def update_route(ign):
-    return update(ign)
-
-
-@router.get("/account-info/<ign>")
-@api.none
-def get_acc_info(ign):
-    return get_account_info.store_account_in_db(get_account_info.get_info_by_ign(ign)["puuid"])
-
-# todo problem with name changes don't use!
+# problem with name changes don't use!
 # @router.get("update-all")
 # @api.none
 # def update_all_accounts():
@@ -46,11 +46,12 @@ def profile_page(ign):
     # todo change location
     mapping = get_account_info.map_id_to_champ()
     update_info = update(ign)
-    # todo for some reason render_template is not working
     if update_info == "toolow":
-        return render_template("unranked.html", ign=ign)
+        yield render_template("unranked.html", ign=ign)
+        return
     elif update_info == "notfound":
-        return render_template("pageNotFound.html", ign=ign)
+        yield render_template("pageNotFound.html", ign=ign)
+        return
     hide = False
     yield "<!DOCTYPE html>"
     if request.args.get("_in_game"):
@@ -128,3 +129,9 @@ def profile_page(ign):
 @router.get("/profile/<ign>")
 def prof__page(ign):
     return stream_with_context(profile_page(ign))
+
+
+@router.errorhandler(404)
+def page_not_found(e):
+    print("here")
+    return render_template("404.html"), 404
