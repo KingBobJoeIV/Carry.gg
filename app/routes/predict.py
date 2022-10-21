@@ -61,7 +61,7 @@ def profile_page(ign):
             yield b" "
             sleep(1)
         hide = True
-        # todo this - 1/2 done, working for update need to do for predict next
+        # todo this - 1/2 done, works for update need to do for predict next
         # # declare cache somewhere? idk
         # # need to use lru
         # # need to check top element on 1 second intervals
