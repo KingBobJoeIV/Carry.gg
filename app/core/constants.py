@@ -27,3 +27,7 @@ TOTAL_DMG_TAKEN_BINS = ...
 # globals
 home = None
 pending = None
+
+# champ/skin info
+SKINS = {}
+CHAMPION_MAPPING = {}

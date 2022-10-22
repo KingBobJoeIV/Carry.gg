@@ -11,6 +11,7 @@ from threading import Thread
 from time import sleep, time
 import json
 import app.core.constants
+from app.imageinfo.imageinfo import skin_info
 router = Blueprint("predict", __name__, url_prefix="/predict")
 
 # not in use
@@ -43,14 +44,14 @@ def home_page():
     app.core.constants.home = True
     if app.core.constants.pending is None:
         app.core.constants.pending = set()
+        skin_info()
+        get_account_info.map_id_to_champ()
     return render_template("home.html")
 
 
 def profile_page(ign):
     # make sure cache exists
     check_pending()
-    # todo change location
-    mapping = get_account_info.map_id_to_champ()
     update_info = update(ign)
     if update_info == "toolow":
         return render_template("unranked.html", ign=ign)
@@ -117,10 +118,7 @@ def profile_page(ign):
             hide = True
             pending = "waiting"
     mastery = get_all_mastery(prof["id"])[0]
-    # todo change location
-    imageinfo.skin_info()
-    skin = imageinfo.randomize_skins_by_champ(mapping[mastery["championId"]])
-
+    skin = imageinfo.randomize_skins_by_champ(app.core.constants.CHAMPION_MAPPING[mastery["championId"]])
     league = get_rank_info(prof["id"])
     if not league:
         league = {"tier": "UNRANKED", "rank": "", "leaguePoints": 0, "wins": 0, "losses": 0}
@@ -133,7 +131,7 @@ def profile_page(ign):
     level = prof["summonerLevel"]
     img_level = determine_level_image(level)
     return render_template("profile.html", ign=prof["name"], icon=prof["profileIconId"], img_level=img_level,
-                           level=level, championName=mapping[mastery["championId"]], skin=skin,
+                           level=level, championName=app.core.constants.CHAMPION_MAPPING[mastery["championId"]], skin=skin,
                            championPoints=mastery["championPoints"], championLevel=mastery["championLevel"],
                            tier=league["tier"], rank=league["rank"], leaguePoints=league["leaguePoints"],
                            wins=league["wins"], losses=league["losses"], hide=hide, pred=pred, pending=pending)
@@ -148,6 +146,8 @@ def check_pending():
     if app.core.constants.home is None:
         app.core.constants.home = True
         app.core.constants.pending = set()
+        skin_info()
+        get_account_info.map_id_to_champ()
 
 
 def predict_live(ign):

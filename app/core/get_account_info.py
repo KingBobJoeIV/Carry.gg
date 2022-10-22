@@ -9,10 +9,6 @@ import time
 import math
 
 
-# todo change location
-mapping = {}
-
-
 # todo needs to be updated every patch
 # @cache
 def map_id_to_champ():
@@ -21,12 +17,11 @@ def map_id_to_champ():
     f = open(p)
     data = json.load(f)
     for key in data["data"].keys():
-        mapping[int(data["data"][key]["key"])] = data["data"][key]["id"]
-    return mapping
+        constants.CHAMPION_MAPPING[int(data["data"][key]["key"])] = data["data"][key]["id"]
 
 
 def get_champ_from_id(championId):
-    return mapping[championId]
+    return constants.CHAMPION_MAPPING[championId]
 
 
 def get_info(puuid):
