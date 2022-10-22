@@ -92,16 +92,19 @@ def profile_page(ign):
     # not in game
     if not check_if_in_game(prof["id"]):
         hide = True
+        print("not ingame")
     # in game
     else:
         live_id = get_live_match(prof["id"])["gameId"]
         in_db = PredictInfo.query.filter(PredictInfo.match_id == str(live_id)).first()
         # check if prediction is pending(calculation)
         if live_id in app.core.constants.pending:
+            print("calculating")
             pending = "calculating"
             hide = True
         # check if prediction is pending(ingame)
         elif in_db is not None and in_db.actualWinner == "Pending":
+            print("waiting")
             hide = True
             pending = "waiting"
     mastery = get_all_mastery(prof["id"])[0]
@@ -130,12 +133,6 @@ def profile_page(ign):
 @router.get("/profile/<ign>")
 def prof_page(ign):
     return stream_with_context(profile_page(ign))
-
-
-@router.errorhandler(404)
-def page_not_found(e):
-    print("here")
-    return render_template("404.html"), 404
 
 
 def check_pending():
