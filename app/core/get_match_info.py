@@ -82,7 +82,10 @@ def update_matches(matchlist):
 
 def check_if_in_game(id):
     try:
-        lol_watcher.spectator.by_summoner(constants.MY_REGION, id)
+        game = lol_watcher.spectator.by_summoner(constants.MY_REGION, id)
+        # need to check if it's ranked
+        if game["gameQueueConfigId"] != 420:
+            return False
         return True
     except Exception as e:
         print(e)
