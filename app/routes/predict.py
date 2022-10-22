@@ -58,8 +58,10 @@ def profile_page(ign):
         return render_template("pageNotFound.html", ign=ign)
     hide = False
     pending = ""
+    thread = False
     # predict live game on diff thread
     if request.args.get("_in_game"):
+        thread = True
         predict_live(ign)
     prof = get_account_info.get_info_by_ign(ign)
     # past/live predictions
@@ -95,24 +97,23 @@ def profile_page(ign):
                                         str(round(p.predictedChance * 100, 2)) + "%", color]))
     pred.sort(key=lambda x: x[0])
     for i in range(len(pred)):
-        print(pred[i][0], pred[i][1])
         pred[i] = pred[i][1]
+    # give enough time for the pending prediction thread to put game in cache
+    if thread:
+        sleep(2)
     # not in game
     if not check_if_in_game(prof["id"]):
         hide = True
-        print("not ingame")
     # in game
     else:
         live_id = get_live_match(prof["id"])["gameId"]
         in_db = PredictInfo.query.filter(PredictInfo.match_id == str(live_id)).first()
         # check if prediction is pending(calculation)
         if live_id in app.core.constants.pending:
-            print("calculating")
             pending = "calculating"
             hide = True
         # check if prediction is pending(ingame)
         elif in_db is not None and in_db.actualWinner == "Pending":
-            print("waiting")
             hide = True
             pending = "waiting"
     mastery = get_all_mastery(prof["id"])[0]
