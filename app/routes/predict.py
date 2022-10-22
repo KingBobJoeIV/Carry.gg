@@ -11,6 +11,7 @@ from threading import Thread
 from time import sleep, time
 import json
 import app.core.constants
+import heapq
 router = Blueprint("predict", __name__, url_prefix="/predict")
 
 # not in use
@@ -87,8 +88,12 @@ def profile_page(ign):
                 color = "#7d7d7dcc"
             elif p.predictedWinner == p.actualWinner:
                 color = "#079a3bcc"
-        pred.append([game_info, team1, team2, p.predictedWinner, p.actualWinner,
-                     str(round(p.predictedChance * 100, 2)) + "%", color])
+        if not game:
+            heapq.heappush(pred, [-float("inf"), game_info, team1, team2, p.predictedWinner, p.actualWinner,
+                                  str(round(p.predictedChance * 100, 2)) + "%", color])
+        else:
+            heapq.heappush(pred, [-int(game.gameStartTimestamp), game_info, team1, team2, p.predictedWinner,
+                                  p.actualWinner, str(round(p.predictedChance * 100, 2)) + "%", color])
     # not in game
     if not check_if_in_game(prof["id"]):
         hide = True

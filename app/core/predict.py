@@ -41,6 +41,10 @@ def predict(ign, app):
     # check if prediction is already pending
     if not add_to_live(curr_match["gameId"]):
         return
+    # check if prediction is already in db
+    in_db = PredictInfo.query.filter(PredictInfo.match_id == str(curr_match["gameId"])).first()
+    if in_db is not None:
+        return
     # get ids of each participant in live game
     participants = curr_match["participants"]
     participant_id_mapping = {}
@@ -128,12 +132,8 @@ def predict(ign, app):
     print("Team 2 Score:", scores[2])
     print("Team 1 Win Percentage:", scores[3])
     print("Team 2 Win Percentage:", scores[4])
-    try:
-        if scores[1] > scores[2]:
-            compare_teams.store_prediction_in_db(scores[0], str(list(participant_id_mapping.keys())), "Team 1", "Pending", scores[3])
-        else:
-            compare_teams.store_prediction_in_db(scores[0], str(list(participant_id_mapping.keys())), "Team 2", "Pending", scores[4])
-    except:
-        # todo don't go through entire process, check at beginning
-        print("prediction already in db!")
+    if scores[1] > scores[2]:
+        compare_teams.store_prediction_in_db(scores[0], str(list(participant_id_mapping.keys())), "Team 1", "Pending", scores[3])
+    else:
+        compare_teams.store_prediction_in_db(scores[0], str(list(participant_id_mapping.keys())), "Team 2", "Pending", scores[4])
     return scores

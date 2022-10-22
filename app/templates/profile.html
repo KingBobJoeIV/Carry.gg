@@ -52,7 +52,7 @@
             <h1 id="igbanner">{{ ign }} is not in game!</h1>
         {% endif %}
         <h2>Past Predictions:</h2>
-        <p color="red">todo fix prediction issues(404 page, hide predict button) + champ quotes? + display order of predictions</p>
+        <p color="red">todo hide predict button on heroku + champ quotes?</p>
         {% if not pred %}
             <p>No Predictions?</p>
             <img src="https://github.com/InFinity54/LoL_DDragon/blob/master/extras/sticker/poro-sweat.png?raw=true" style="width: 25%; height: 25%">
@@ -60,22 +60,22 @@
         <div class="predictions">
             <ol style="list-style: none">
                 {% for row in pred %}
-                    <li class="game_container" style="background-color: {{ row[6] }}">
+                    <li class="game_container" style="background-color: {{ row[7] }}">
                         <div class="game_metadata">
                             <p> Game Info</p>
-                            <p>{{ row[0][0] }}</p>
-                            <p>{{ row[0][1] }}</p>
+                            <p>{{ row[1][0] }}</p>
+                            <p>{{ row[1][1] }}</p>
                         </div>
                         <div class="game_predict_info">
-                            <p>Predicted Winner: {{ row[3] }}</p>
-                            <p>Actual Winner: {{ row[4] }}</p>
-                            <p>Predicted Chance: {{ row[5] }}</p>
+                            <p>Predicted Winner: {{ row[4] }}</p>
+                            <p>Actual Winner: {{ row[5] }}</p>
+                            <p>Predicted Chance: {{ row[6] }}</p>
                         </div>
                         <div class="game_player_info">
                             <div class="game_team_1_info">
                                 <ol style="list-style: none">
                                     Team 1:
-                                    {% for player in row[1] %}
+                                    {% for player in row[2] %}
                                         <li> <a href="/predict/profile/{{ player }}" target="_blank">{{ player }}</a></li>
                                     {% endfor %}
                                 </ol>
@@ -83,7 +83,7 @@
                             <div class="game_team_2_info">
                                 <ol style="list-style: none">
                                     Team 2:
-                                    {% for player in row[2] %}
+                                    {% for player in row[3] %}
                                         <li> <a href="/predict/profile/{{ player }}" target="_blank">{{ player }}</a></li>
                                     {% endfor %}
                                 </ol>
