@@ -3,13 +3,14 @@ from app.decorators.api_response import api
 from app.core.predict import predict, get_account_info
 from app.core.update import update, update_account_table
 from app.core.get_account_info import get_all_mastery, get_rank_info, determine_level_image
-from app.core.get_match_info import check_if_in_game, calculate_game_time
+from app.core.get_match_info import check_if_in_game, calculate_game_time, get_live_match
 from app.imageinfo import imageinfo
 from app.db import db
 from app.db.schemas import PredictInfo, AccountInfo, GameInfo
 from threading import Thread
 from time import sleep, time
 import json
+import app.core.constants
 router = Blueprint("predict", __name__, url_prefix="/predict")
 
 # not in use
@@ -39,39 +40,27 @@ router = Blueprint("predict", __name__, url_prefix="/predict")
 
 @router.get("/home")
 def home_page():
+    app.core.constants.home = True
+    if app.core.constants.pending is None:
+        app.core.constants.pending = set()
     return render_template("home.html")
 
 
 def profile_page(ign):
+    # make sure cache exists
+    check_pending()
     # todo change location
     mapping = get_account_info.map_id_to_champ()
     update_info = update(ign)
     if update_info == "toolow":
-        yield render_template("unranked.html", ign=ign)
-        return
+        return render_template("unranked.html", ign=ign)
     elif update_info == "notfound":
-        yield render_template("pageNotFound.html", ign=ign)
-        return
+        return render_template("pageNotFound.html", ign=ign)
     hide = False
-    yield "<!DOCTYPE html>"
+    pending = ""
+    # predict live game on diff thread
     if request.args.get("_in_game"):
-        t=Thread(target=predict,args=(ign,current_app._get_current_object()))
-        t.start()
-        while t.is_alive():
-            yield b" "
-            sleep(1)
-        hide = True
-        # todo this - 1/2 done, works for update need to do for predict next
-        # # declare cache somewhere? idk
-        # # need to use lru
-        # # need to check top element on 1 second intervals
-        # if ign not in cache:
-        #     predict(ign)
-        #     cache[live_match_id] = currentTime + 2 min
-        #     hide = True
-        # else:
-        #     # popup saying request already in progress/complete
-
+        predict_live(ign)
     prof = get_account_info.get_info_by_ign(ign)
     # past/live predictions
     predictions = PredictInfo.query.filter(PredictInfo.ids.contains(prof["id"])).all()
@@ -100,9 +89,21 @@ def profile_page(ign):
                 color = "#079a3bcc"
         pred.append([game_info, team1, team2, p.predictedWinner, p.actualWinner,
                      str(round(p.predictedChance * 100, 2)) + "%", color])
-
+    # not in game
     if not check_if_in_game(prof["id"]):
         hide = True
+    # in game
+    else:
+        live_id = get_live_match(prof["id"])["gameId"]
+        in_db = PredictInfo.query.filter(PredictInfo.match_id == str(live_id)).first()
+        # check if prediction is pending(calculation)
+        if live_id in app.core.constants.pending:
+            pending = "calculating"
+            hide = True
+        # check if prediction is pending(ingame)
+        elif in_db is not None and in_db.actualWinner == "Pending":
+            hide = True
+            pending = "waiting"
     mastery = get_all_mastery(prof["id"])[0]
     # todo change location
     imageinfo.skin_info()
@@ -119,15 +120,15 @@ def profile_page(ign):
     # determine which border image to use
     level = prof["summonerLevel"]
     img_level = determine_level_image(level)
-    yield render_template("profile.html", ign=prof["name"], icon=prof["profileIconId"], img_level=img_level,
+    return render_template("profile.html", ign=prof["name"], icon=prof["profileIconId"], img_level=img_level,
                            level=level, championName=mapping[mastery["championId"]], skin=skin,
                            championPoints=mastery["championPoints"], championLevel=mastery["championLevel"],
                            tier=league["tier"], rank=league["rank"], leaguePoints=league["leaguePoints"],
-                           wins=league["wins"], losses=league["losses"], hide=hide, pred=pred)
+                           wins=league["wins"], losses=league["losses"], hide=hide, pred=pred, pending=pending)
 
 
 @router.get("/profile/<ign>")
-def prof__page(ign):
+def prof_page(ign):
     return stream_with_context(profile_page(ign))
 
 
@@ -135,3 +136,14 @@ def prof__page(ign):
 def page_not_found(e):
     print("here")
     return render_template("404.html"), 404
+
+
+def check_pending():
+    if app.core.constants.home is None:
+        app.core.constants.home = True
+        app.core.constants.pending = set()
+
+
+def predict_live(ign):
+    t = Thread(target=predict, args=(ign, current_app._get_current_object()))
+    t.start()

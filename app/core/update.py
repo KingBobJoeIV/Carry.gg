@@ -6,7 +6,6 @@ from . import compare_teams
 import time
 
 
-# todo need to put a rate limit per account(every 2 min); remember when last updated and compare to current time
 def update(ign):
     try:
         account = get_account_info.get_info_by_ign(ign)
@@ -28,12 +27,21 @@ def update(ign):
             # if already stored
             if not GameInfo.query.filter_by(matchId="NA1_" + prediction.match_id).first():
                 get_match_info.store_match_in_db(match)
+            # remove it from cache if still in it
+            if int(prediction.match_id) in constants.pending:
+                constants.pending.remove(int(prediction.match_id))
             # if team 1 won
             if match["info"]["teams"][0]["win"]:
                 compare_teams.update_prediction_db(prediction.match_id, "Team 1")
             else:
                 compare_teams.update_prediction_db(prediction.match_id, "Team 2")
         except:
+            # remove it from cache
+            try:
+                constants.pending.remove(int(prediction.match_id))
+            except Exception as e:
+                print("e", e)
+                continue
             continue
     return "ok"
 

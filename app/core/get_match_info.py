@@ -22,7 +22,7 @@ def get_all_matches(puuid):
     return total
 
 
-# returns 20 most recent ranked matches #todo make sure its actually ranked only
+# returns 20 most recent ranked matches
 def get_matches(puuid, start=0):
     return lol_watcher.match.matchlist_by_puuid(constants.REGION, puuid, start=start,count=20,queue=420)
 

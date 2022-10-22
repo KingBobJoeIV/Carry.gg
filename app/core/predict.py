@@ -8,6 +8,11 @@ from .watcher import lol_watcher
 from app.db import db
 from app.db.schemas import PredictInfo, AccountInfo, GameInfo, Game
 from app.internal.roleidentification import pull_data, get_roles
+# from cachetools import cached, TTLCache
+# from app.internal.caching.response_caching import cache
+
+
+#cache = TTLCache(maxsize=100, ttl=86400)
 
 
 def get_key(dict, val):
@@ -16,23 +21,26 @@ def get_key(dict, val):
             return key
 
 
-# predict live game given username
-def predict(ign,app):
-    app.app_context().push()
-    # this is for most recent
-    # # get matches of current user
-    # curr_user_matches = get_match_info.get_matches(current_puuid,0)
-    #
-    # # get user's most recent game id
-    # most_recent_game = curr_user_matches[0]
-    #
-    # # get info of most recent game
-    # curr_match = lol_watcher.match.by_id(constants.REGION, most_recent_game)
-    # participants = curr_match["metadata"]["participants"]
+def add_to_live(match):
+    if match in constants.pending:
+        return False
+    constants.pending.add(match)
+    return True
 
+
+def remove_live(match):
+    constants.pending.remove(match)
+
+
+# predict live game given username
+def predict(ign, app):
+    app.app_context().push()
     # this is for live game
     current_id = get_account_info.get_info_by_ign(ign)["id"]
     curr_match = get_match_info.get_live_match(current_id)
+    # check if prediction is already pending
+    if not add_to_live(curr_match["gameId"]):
+        return
     # get ids of each participant in live game
     participants = curr_match["participants"]
     participant_id_mapping = {}
