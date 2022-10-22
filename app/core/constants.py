@@ -27,3 +27,7 @@ TOTAL_DMG_TAKEN_BINS = ...
 # globals
 home = None
 pending = None
+
+# time
+EPOCH_SUBTRACT = 1660000000000
+

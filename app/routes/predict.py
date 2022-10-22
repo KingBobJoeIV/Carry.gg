@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request,current_app,stream_with_context
+from flask import Blueprint, render_template, request, current_app, stream_with_context
 from app.decorators.api_response import api
 from app.core.predict import predict, get_account_info
 from app.core.update import update, update_account_table
@@ -11,7 +11,6 @@ from threading import Thread
 from time import sleep, time
 import json
 import app.core.constants
-import heapq
 router = Blueprint("predict", __name__, url_prefix="/predict")
 
 # not in use
@@ -89,11 +88,15 @@ def profile_page(ign):
             elif p.predictedWinner == p.actualWinner:
                 color = "#079a3bcc"
         if not game:
-            heapq.heappush(pred, [-float("inf"), game_info, team1, team2, p.predictedWinner, p.actualWinner,
-                                  str(round(p.predictedChance * 100, 2)) + "%", color])
+            pred.append((float("-inf"), [game_info, team1, team2, p.predictedWinner, p.actualWinner,
+                                  str(round(p.predictedChance * 100, 2)) + "%", color]))
         else:
-            heapq.heappush(pred, [-int(game.gameStartTimestamp), game_info, team1, team2, p.predictedWinner,
-                                  p.actualWinner, str(round(p.predictedChance * 100, 2)) + "%", color])
+            pred.append((-int(game.gameStartTimestamp), [game_info, team1, team2, p.predictedWinner, p.actualWinner,
+                                        str(round(p.predictedChance * 100, 2)) + "%", color]))
+    pred.sort(key=lambda x: x[0])
+    for i in range(len(pred)):
+        print(pred[i][0], pred[i][1])
+        pred[i] = pred[i][1]
     # not in game
     if not check_if_in_game(prof["id"]):
         hide = True
