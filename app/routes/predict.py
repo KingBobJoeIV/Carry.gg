@@ -39,6 +39,10 @@ router = Blueprint("predict", __name__, url_prefix="/predict")
 #     return update_account_table()
 
 
+@router.get("/home/riot.txt")
+def riot_verify():
+    return render_template("riot.txt")
+
 @router.get("/home")
 def home_page():
     app.core.constants.home = True
