@@ -134,6 +134,7 @@ def profile_page(ign):
     # determine which border image to use
     level = prof["summonerLevel"]
     img_level = determine_level_image(level)
+    print("hide", hide, "pending", pending)
     return render_template("profile.html", ign=prof["name"], icon=prof["profileIconId"], img_level=img_level,
                            level=level, championName=app.core.constants.CHAMPION_MAPPING[mastery["championId"]], skin=skin,
                            championPoints=mastery["championPoints"], championLevel=mastery["championLevel"],
