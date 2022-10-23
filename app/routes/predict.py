@@ -126,10 +126,6 @@ def profile_page(ign):
     league = get_rank_info(prof["id"])
     if not league:
         league = {"tier": "UNRANKED", "rank": "", "leaguePoints": 0, "wins": 0, "losses": 0}
-    elif league[0]["queueType"] == "RANKED_FLEX_SR":
-        league = league[1]
-    else:
-        league = league[0]
 
     # determine which border image to use
     level = prof["summonerLevel"]

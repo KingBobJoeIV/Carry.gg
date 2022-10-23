@@ -37,7 +37,10 @@ def get_puuid_from_id(id):
 
 
 def get_rank_info(summonerId):
-    return lol_watcher.league.by_summoner(constants.MY_REGION, summonerId)
+    leagues = lol_watcher.league.by_summoner(constants.MY_REGION, summonerId)
+    for league in leagues:
+        if league["queueType"] == "RANKED_SOLO_5x5":
+            return league
 
 
 def get_mastery_for_champ(summonerId, championId):
@@ -63,10 +66,6 @@ def store_account_in_db(puuid):
         league = get_rank_info(curr["id"])
         if not league:
             league = []
-        elif league[0]["queueType"] == "RANKED_FLEX_SR":
-            league = league[1]
-        else:
-            league = league[0]
         row = AccountInfo(curr, mastery, league)
         db.session.add(row)
     # if it has been at least 2 minutes since last update, update info
@@ -75,10 +74,6 @@ def store_account_in_db(puuid):
         league = get_rank_info(curr["id"])
         if not league:
             league = []
-        elif league[0]["queueType"] == "RANKED_FLEX_SR":
-            league = league[1]
-        else:
-            league = league[0]
         row = AccountInfo(curr, mastery, league)
         print("Updating:", curr["name"])
         for field in account_fields:
