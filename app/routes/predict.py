@@ -142,6 +142,12 @@ def prof_page(ign):
     return stream_with_context(profile_page(ign))
 
 
+@router.get("/profile/<ign>?_in_game=1")
+def redirect_to_prof(ign):
+    print("herereee")
+    return stream_with_context(profile_page(ign))
+
+
 def check_pending():
     if app.core.constants.home is None:
         app.core.constants.home = True
