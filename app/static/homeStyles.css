@@ -21,15 +21,25 @@ body {
 }
 
 .recent_searches_content {
-    display: block;
+    padding-left: 0;
+    display: flex;
     position: absolute;
     background-color: #f6f6f6;
-    min-width: 230px;
-    border: 1px solid #ddd;
+    padding-right: 30%;
     z-index: 1;
 }
 
-.recent_searches_content a:hover {background-color: #f1f1f1}
+.recent_searches_content ul {
+    padding: 0;
+    list-style-type: none;
+}
+
+.recent_searches_content li {
+    display: block;
+    text-align: left;
+}
+
+.recent_searches_content li:hover {background-color: #e1e1e1}
 
 a {
     color: darkgoldenrod;

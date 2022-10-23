@@ -11,14 +11,12 @@
 <div class="center">
     <h1 style="font-size: xxx-large">Carry.gg</h1>
     <p style="font-size: xx-large;">Predict the outcome of a live LoL game.</p>
-    <p>add recent + favorite searches using localstorage/fix search by enter </p>
+    <p>TODO: add favorite searches</p>
     <form id="search-form">
         <div class="recent_searches">
             <input type="text" placeholder="Enter your IGN (NA)" id="myInput" onclick="displayRecent()"/>
-{#            <ul id="recent" hidden="hidden" class="recent_searches_content">#}
-{#            </ul>#}
-            <div class="recent_searches_content" hidden="hidden" id="recent">
-            </div>
+            <ul id="recent" class="recent_searches_content" style="display: none">
+            </ul>
         </div>
         <button type="submit">Search</button>
     </form>
@@ -29,35 +27,26 @@
 </body>
 </html>
 <script>
+
     // get localStorage values if supported
     function init() {
         document.getElementById("recent").innerHTML = ''
         const items = localStorage.getItem("items");
         const itemJson = items ? JSON.parse(items) : [];
         for (const i of itemJson) {
+            const li = document.createElement("li");
             const node = document.createElement('a');
             node.href = "/predict/profile/" + i;
             node.textContent = i;
-            document.getElementById('recent').appendChild(node);
+            li.appendChild(node);
+            document.getElementById('recent').appendChild(li);
         }
+        // hide recent searches on load
+        document.getElementById("recent").hidden = true;
     }
 
     init();
     document.querySelector("#search-form").addEventListener("submit", search);
-
-    function createLink(name) {
-        {#const li = document.createElement("li");#}
-        const a = document.createElement("a");
-        let url = "/predict/profile/" + name;
-        a.href = url;
-        a.text = name;
-        {#li.appendChild(a);#}
-        {#li.textContent = name;#}
-        {#console.log(li);#}
-        {#return li;#}
-        console.log(a);
-        return a;
-    }
 
     function search(e) {
         e.preventDefault();
@@ -73,11 +62,10 @@
         init();
         // search for that url
         const url = "/predict/profile/" + inputVal;
-        // window.alert(url);
         window.location.href = url;
     }
 
-    let mode = "none";
+    let mode = "block";
 
     function displayRecent() {
         const el = document.getElementById("recent");
