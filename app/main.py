@@ -28,6 +28,7 @@ app.register_blueprint(predict.router)
 
 app.register_error_handler(404, not_found)
 app.register_error_handler(429, rate_limit_exceeded)
+app.register_error_handler(500, rate_limit_exceeded)
 app.register_error_handler(405, method_not_allowed)
 
 m = Middleware(app)

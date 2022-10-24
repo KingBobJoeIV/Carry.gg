@@ -7,7 +7,7 @@ def not_found(e):
 
 
 def rate_limit_exceeded(e):
-    return render_template("404.html"), 429
+    return render_template("429-500.html"), 429, 500
 
 
 def method_not_allowed(e):

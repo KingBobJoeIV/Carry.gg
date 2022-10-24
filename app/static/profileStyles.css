@@ -25,7 +25,6 @@ img {
 .main {
     text-align: center;
     margin-left: 15%; /* Same as the width of the sidebar */
-    padding: 0px 10px;
     color: darkgoldenrod;
 }
 body {
@@ -88,9 +87,9 @@ body {
     width: 90%;
 }
 .predictions {
-    position: absolute;
-    left: 38%;
-    display: flex;
+    position: relative;
+    align-self: center;
+    display: inline-block;
 }
 .game_container {
     display: flex;
