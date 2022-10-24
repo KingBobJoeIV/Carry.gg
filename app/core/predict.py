@@ -24,6 +24,9 @@ def get_key(dict, val):
 def add_to_live(match):
     if match in constants.pending:
         return False
+    in_db = PredictInfo.query.filter(PredictInfo.match_id == str(match)).first()
+    if in_db is not None and in_db.actualWinner == "Pending":
+        return False
     constants.pending.add(match)
     return True
 

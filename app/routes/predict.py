@@ -55,6 +55,7 @@ def home_page():
 
 def profile_page(ign):
     # make sure cache exists
+    print("loaded!")
     check_pending()
     update_info = update(ign)
     if update_info == "toolow":
@@ -109,16 +110,19 @@ def profile_page(ign):
     # not in game
     if not check_if_in_game(prof["id"]):
         hide = True
+        print("not ingame")
     # in game
     else:
         live_id = get_live_match(prof["id"])["gameId"]
         in_db = PredictInfo.query.filter(PredictInfo.match_id == str(live_id)).first()
         # check if prediction is pending(calculation)
         if live_id in app.core.constants.pending:
+            print("calculating")
             pending = "calculating"
             hide = True
         # check if prediction is pending(ingame)
         elif in_db is not None and in_db.actualWinner == "Pending":
+            print("waiting")
             hide = True
             pending = "waiting"
     mastery = get_all_mastery(prof["id"])[0]

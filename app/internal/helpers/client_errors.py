@@ -6,6 +6,10 @@ def not_found(e):
     return render_template("404.html"), 404
 
 
+def rate_limit_exceeded(e):
+    return render_template("404.html"), 429
+
+
 def method_not_allowed(e):
     return json_response(
         {"error": "Method not allowed"},
