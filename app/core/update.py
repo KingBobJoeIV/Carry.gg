@@ -9,8 +9,10 @@ import time
 def update(ign):
     try:
         account = get_account_info.get_info_by_ign(ign)
+    # todo do separate error codes(notfound/servererror)
+    # todo also add this when getting matches(500)
     except Exception as e:
-        print(e)
+        print(e.__class__)
         return "notfound"
     # too low level players have no profile
     if account["summonerLevel"] < 30:

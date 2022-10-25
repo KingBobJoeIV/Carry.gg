@@ -43,6 +43,7 @@ router = Blueprint("predict", __name__, url_prefix="/predict")
 def riot_verify():
     return render_template("riot.txt")
 
+
 @router.get("/home")
 def home_page():
     app.core.constants.home = True
@@ -62,6 +63,8 @@ def profile_page(ign):
         return render_template("unranked.html", ign=ign)
     elif update_info == "notfound":
         return render_template("pageNotFound.html", ign=ign)
+    elif update_info == "servererror":
+        return render_template("500.html")
     hide = False
     pending = ""
     thread = False
@@ -149,7 +152,6 @@ def prof_page(ign):
 
 @router.get("/profile/<ign>?_in_game=1")
 def redirect_to_prof(ign):
-    print("herereee")
     return stream_with_context(profile_page(ign))
 
 
