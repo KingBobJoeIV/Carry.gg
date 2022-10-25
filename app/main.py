@@ -4,7 +4,7 @@ from floodgate.flask import guard
 from app.db import db
 from app.internal.constants import DATABASE_URL, IS_PROD
 from app.internal.helpers import ip_resolver
-from app.internal.helpers.client_errors import method_not_allowed, not_found, rate_limit_exceeded
+from app.internal.helpers.client_errors import method_not_allowed, not_found, too_many_requests
 from app.middlewares import Middleware, cors, process_time
 from app.routes import common,predict
 
@@ -27,8 +27,7 @@ app.register_blueprint(common.router)
 app.register_blueprint(predict.router)
 
 app.register_error_handler(404, not_found)
-app.register_error_handler(429, rate_limit_exceeded)
-app.register_error_handler(500, rate_limit_exceeded)
+app.register_error_handler(500, too_many_requests)
 app.register_error_handler(405, method_not_allowed)
 
 m = Middleware(app)

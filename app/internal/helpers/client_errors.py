@@ -6,8 +6,8 @@ def not_found(e):
     return render_template("404.html"), 404
 
 
-def rate_limit_exceeded(e):
-    return render_template("429-500.html"), 429, 500
+def too_many_requests(e):
+    return render_template("500.html"), 500
 
 
 def method_not_allowed(e):
