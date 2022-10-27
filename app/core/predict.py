@@ -8,6 +8,8 @@ from .watcher import lol_watcher
 from app.db import db
 from app.db.schemas import PredictInfo, AccountInfo, GameInfo, Game
 from app.internal.roleidentification import pull_data, get_roles
+from pathlib import Path
+import os
 # from cachetools import cached, TTLCache
 # from app.internal.caching.response_caching import cache
 
@@ -22,17 +24,21 @@ def get_key(dict, val):
 
 
 def add_to_live(match):
-    if match in constants.pending:
+    f_name = "app/pending/" + str(match) + ".txt"
+    file = Path(f_name)
+    if file.is_file():
         return False
     in_db = PredictInfo.query.filter(PredictInfo.match_id == str(match)).first()
     if in_db is not None and in_db.actualWinner == "Pending":
         return False
-    constants.pending.add(match)
+    f = open(f_name, "w")
+    f.close()
     return True
 
 
 def remove_live(match):
-    constants.pending.remove(match)
+    f_path = "app/pending/" + str(match) + ".txt"
+    os.remove(f_path)
 
 
 # predict live game given username
@@ -139,4 +145,6 @@ def predict(ign, app):
         compare_teams.store_prediction_in_db(scores[0], str(list(participant_id_mapping.keys())), "Team 1", "Pending", scores[3])
     else:
         compare_teams.store_prediction_in_db(scores[0], str(list(participant_id_mapping.keys())), "Team 2", "Pending", scores[4])
+    # remove finished prediction from files
+    remove_live(curr_match["gameId"])
     return scores

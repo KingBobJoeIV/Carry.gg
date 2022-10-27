@@ -11,6 +11,7 @@ from threading import Thread
 from time import sleep, time
 import json
 import app.core.constants
+from pathlib import Path
 from app.imageinfo.imageinfo import skin_info
 router = Blueprint("predict", __name__, url_prefix="/predict")
 
@@ -46,9 +47,8 @@ def riot_verify():
 
 @router.get("/home")
 def home_page():
-    app.core.constants.home = True
-    if app.core.constants.pending is None:
-        app.core.constants.pending = set()
+    if app.core.constants.home is None:
+        app.core.constants.home = True
         skin_info()
         get_account_info.map_id_to_champ()
     return render_template("home.html")
@@ -119,7 +119,9 @@ def profile_page(ign):
         live_id = get_live_match(prof["id"])["gameId"]
         in_db = PredictInfo.query.filter(PredictInfo.match_id == str(live_id)).first()
         # check if prediction is pending(calculation)
-        if live_id in app.core.constants.pending:
+        f_name = "app/pending/" + str(live_id) + ".txt"
+        file = Path(f_name)
+        if file.is_file():
             print("calculating")
             pending = "calculating"
             hide = True
@@ -158,7 +160,6 @@ def redirect_to_prof(ign):
 def check_pending():
     if app.core.constants.home is None:
         app.core.constants.home = True
-        app.core.constants.pending = set()
         skin_info()
         get_account_info.map_id_to_champ()
 

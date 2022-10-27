@@ -131,3 +131,6 @@ dmypy.json
 .env.json
 @request-log/
 @cache/
+
+# temp prediction files
+app/pending/*

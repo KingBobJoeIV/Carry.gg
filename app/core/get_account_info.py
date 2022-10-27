@@ -29,10 +29,7 @@ def get_info(puuid):
 
 
 def get_info_by_ign(ign):
-    try:
-        return lol_watcher.summoner.by_name(constants.MY_REGION, ign)
-    except Exception as e:
-        raise e
+    return lol_watcher.summoner.by_name(constants.MY_REGION, ign)
 
 
 def get_puuid_from_id(id):
