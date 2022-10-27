@@ -24,8 +24,11 @@ def get_key(dict, val):
 
 
 def add_to_live(match):
+    print(os.getcwd())
+    print(Path.cwd())
     f_name = "app/pending/" + str(match) + ".txt"
     file = Path(f_name)
+    print(file)
     if file.is_file():
         return False
     in_db = PredictInfo.query.filter(PredictInfo.match_id == str(match)).first()

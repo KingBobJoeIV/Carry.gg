@@ -3,7 +3,10 @@ from . import get_account_info, get_match_info, compare_teams
 from app.db import db
 from app.db.schemas import AccountInfo, PredictInfo, GameInfo
 from . import compare_teams
+from app.core.predict import remove_live
 import time
+import os
+from pathlib import Path
 
 
 def update(ign):
@@ -29,21 +32,23 @@ def update(ign):
             # if already stored
             if not GameInfo.query.filter_by(matchId="NA1_" + prediction.match_id).first():
                 get_match_info.store_match_in_db(match)
-            # # remove it from files if still in it
-            # if int(prediction.match_id) in constants.pending:
-            #     constants.pending.remove(int(prediction.match_id))
+            # remove it from files if still in it
+            f_name = "app/pending/" + prediction.match_id + ".txt"
+            file = Path(f_name)
+            if file.is_file():
+                remove_live(prediction.match_id)
             # if team 1 won
             if match["info"]["teams"][0]["win"]:
                 compare_teams.update_prediction_db(prediction.match_id, "Team 1")
             else:
                 compare_teams.update_prediction_db(prediction.match_id, "Team 2")
         except:
-            # # remove it from files
-            # try:
-            #     constants.pending.remove(int(prediction.match_id))
-            # except Exception as e:
-            #     print("e", e)
-            #     continue
+            # remove it from files
+            try:
+                remove_live(prediction.match_id)
+            except Exception as e:
+                print("e", e)
+                continue
             continue
     return "ok"
 
