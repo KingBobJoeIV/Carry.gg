@@ -24,10 +24,9 @@ def get_key(dict, val):
 
 
 def add_to_live(match):
-    print(os.getcwd())
-    print(Path.cwd())
+    curr = Path.cwd()
     f_name = "app/pending/" + str(match) + ".txt"
-    file = Path(f_name)
+    file = make_path(match)
     print(file)
     if file.is_file():
         return False
@@ -39,9 +38,14 @@ def add_to_live(match):
     return True
 
 
-def remove_live(match):
+def make_path(match):
+    curr = Path.cwd()
     f_path = "app/pending/" + str(match) + ".txt"
-    os.remove(f_path)
+    return curr / f_path
+
+
+def remove_live(match):
+    os.remove(make_path(match))
 
 
 # predict live game given username

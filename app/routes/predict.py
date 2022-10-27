@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, current_app, stream_with_context
 from app.decorators.api_response import api
-from app.core.predict import predict, get_account_info
+from app.core.predict import predict, get_account_info, make_path
 from app.core.update import update, update_account_table
 from app.core.get_account_info import get_all_mastery, get_rank_info, determine_level_image
 from app.core.get_match_info import check_if_in_game, calculate_game_time, get_live_match
@@ -119,8 +119,7 @@ def profile_page(ign):
         live_id = get_live_match(prof["id"])["gameId"]
         in_db = PredictInfo.query.filter(PredictInfo.match_id == str(live_id)).first()
         # check if prediction is pending(calculation)
-        f_name = "app/pending/" + str(live_id) + ".txt"
-        file = Path(f_name)
+        file = make_path(live_id)
         if file.is_file():
             print("calculating")
             pending = "calculating"

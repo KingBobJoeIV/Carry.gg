@@ -3,7 +3,7 @@ from . import get_account_info, get_match_info, compare_teams
 from app.db import db
 from app.db.schemas import AccountInfo, PredictInfo, GameInfo
 from . import compare_teams
-from app.core.predict import remove_live
+from app.core.predict import remove_live, make_path
 import time
 import os
 from pathlib import Path
@@ -33,8 +33,7 @@ def update(ign):
             if not GameInfo.query.filter_by(matchId="NA1_" + prediction.match_id).first():
                 get_match_info.store_match_in_db(match)
             # remove it from files if still in it
-            f_name = "app/pending/" + prediction.match_id + ".txt"
-            file = Path(f_name)
+            file = make_path(prediction.match_id)
             if file.is_file():
                 remove_live(prediction.match_id)
             # if team 1 won
