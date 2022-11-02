@@ -12,7 +12,7 @@ import math
 # todo needs to be updated every patch
 # @cache
 def map_id_to_champ():
-    p=Path("./app/ddragon_12_20_1_champ_data.json").resolve()
+    p=Path("./app/ddragon_12_21_1_champ_data.json").resolve()
     print(p)
     f = open(p)
     data = json.load(f)
