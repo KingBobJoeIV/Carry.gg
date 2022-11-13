@@ -1,4 +1,3 @@
-from .game import Game
-from .gameinfo import GameInfo
+from .bettergame import BetterGame
 from .accountinfo import AccountInfo
 from .predictinfo import PredictInfo

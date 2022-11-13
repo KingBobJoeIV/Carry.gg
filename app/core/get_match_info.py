@@ -1,14 +1,14 @@
 from .watcher import lol_watcher
 from . import constants
 from app.db import db
-from app.db.schemas import Game, GameInfo
+from app.db.schemas import BetterGame
 import time
 from humanfriendly import format_timespan
+from sqlalchemy import or_
 
 
-# get all matches of season #todo unused
+# get all ranked matches # todo of season
 def get_all_matches(puuid):
-    print("here")
     start = 0
     total = []
     while True:
@@ -22,9 +22,9 @@ def get_all_matches(puuid):
     return total
 
 
-# returns 20 most recent ranked matches
+# returns 100 ranked matches
 def get_matches(puuid, start=0):
-    return lol_watcher.match.matchlist_by_puuid(constants.REGION, puuid, start=start,count=20,queue=420)
+    return lol_watcher.match.matchlist_by_puuid(constants.REGION, puuid, start=start, count=100, queue=420)
 
 
 def get_match_by_id(matchid):
@@ -36,11 +36,13 @@ def get_live_match(id):
 
 
 # returns match info for one match
-def get_stats_from_match(match):
+def get_stats_from_match(match, puuid):
     def stat_by_time(stat, time=match.gameDuration):
         return stat / time
+    participant = get_participant(puuid, match)
     # kills, deaths, assists, cs/min, win
-    return [match.kills, match.deaths, match.assists, stat_by_time(match.neutralMinionsKilled + match.totalMinionsKilled), match.win]
+    return [participant.kills, participant.deaths, participant.assists,
+            stat_by_time(participant.neutralMinionsKilled + participant.totalMinionsKilled), participant.win]
     # todo choose which cols are relevant and return values(APPLY FUNCTIONS eg. by min)
     # order: kills, deaths, assists, cs/min, win, gold/min, vision/min, %of game spent dead, dmg/min, damage taken/min
     # return [match.kills, match.deaths, match.assists, stat_by_time(match.neutralMinionsKilled + match.totalMinionsKilled),
@@ -61,20 +63,34 @@ def store_match_in_db(match):
     duration = match["info"]["gameDuration"]
     start = match["info"]["gameStartTimestamp"]
     version = match["info"]["gameVersion"]
-    queue = match["info"]["queueId"]
-    row = GameInfo(id, duration, start, version, queue)
-    db.session.add(row)
     # get individual participant info
+    puuids = match["metadata"]["participants"]
     participants = match["info"]["participants"]
+    champ_roles = []
     for p in participants:
-        row = Game(id, start, duration, version, p)
-        db.session.add(row)
+        champ_roles = p["championId"] + ", " + p["teamPosition"]
+    row = BetterGame(id, start, duration, version, puuids, champ_roles, participants)
+    db.session.add(row)
     db.session.commit()
+
+
+def get_stored_by_champ_role(participant, champ_role):
+    return BetterGame.query.filter_by(BetterGame.puuid == participant,
+                                      or_(BetterGame.participantOneChamp == champ_role,
+                                       BetterGame.participantTwoChamp == champ_role,
+                                       BetterGame.participantThreeChamp == champ_role,
+                                       BetterGame.participantFourChamp == champ_role,
+                                       BetterGame.participantFiveChamp == champ_role,
+                                       BetterGame.participantSixChamp == champ_role,
+                                       BetterGame.participantSevenChamp == champ_role,
+                                       BetterGame.participantEightChamp == champ_role,
+                                       BetterGame.participantNineChamp == champ_role,
+                                       BetterGame.participantTenChamp == champ_role))
 
 
 def update_matches(matchlist):
     for match in matchlist:
-        info = GameInfo.query.filter_by(matchId=str(match)).first()
+        info = BetterGame.query.filter_by(match_id=str(match)).first()
         # if match is not in db
         if not info:
             store_match_in_db(get_match_by_id(match))
@@ -99,7 +115,8 @@ def calculate_game_time(start, duration):
     current = time.time()
     diff = current - (start + duration)
     res = format_timespan(duration)
-    return time_since_game(diff), res.replace(" hours", "h").replace(" minutes", "m").replace("and", "").replace(" seconds", "s")
+    return time_since_game(diff), res.replace(" hours", "h").replace(" minutes", "m").replace("and", "").replace(
+        " seconds", "s")
 
 
 def time_since_game(seconds):

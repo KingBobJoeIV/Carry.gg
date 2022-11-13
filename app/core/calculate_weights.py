@@ -12,12 +12,11 @@ def mby_id(region,match):
     return a
 
 
-def calculate_weights(matches):
+def calculate_weights(matches, puuid):
     datas = []
-    # match is a row of Game table
     count = 0
     for match in matches:
-        datas.append(np.array(get_match_info.get_stats_from_match(match)))
+        datas.append(np.array(get_match_info.get_stats_from_match(match, puuid)))
         count += 1
     data = sum(datas)
     if not datas:

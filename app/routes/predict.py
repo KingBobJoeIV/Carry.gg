@@ -6,7 +6,7 @@ from app.core.get_account_info import get_all_mastery, get_rank_info, determine_
 from app.core.get_match_info import check_if_in_game, calculate_game_time, get_live_match
 from app.imageinfo import imageinfo
 from app.db import db
-from app.db.schemas import PredictInfo, AccountInfo, GameInfo
+from app.db.schemas import PredictInfo, AccountInfo, BetterGame
 from threading import Thread
 from time import sleep, time
 import json
@@ -59,6 +59,7 @@ def profile_page(ign):
     print("loaded!")
     check_pending()
     update_info = update(ign)
+    print("updated!")
     if update_info == "toolow":
         return render_template("unranked.html", ign=ign)
     elif update_info == "notfound":
@@ -76,8 +77,9 @@ def profile_page(ign):
     # past/live predictions
     predictions = PredictInfo.query.filter(PredictInfo.ids.contains(prof["id"])).all()
     pred = []
+    # todo game
     for p in predictions:
-        game = GameInfo.query.filter_by(matchId="NA1_" + p.match_id).first()
+        game = BetterGame.query.filter_by(match_id="NA1_" + p.match_id).first()
         if not game:
             game_info = ["In Progress", ""]
         else:

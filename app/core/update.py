@@ -1,7 +1,7 @@
 from . import constants
 from . import get_account_info, get_match_info, compare_teams
 from app.db import db
-from app.db.schemas import AccountInfo, PredictInfo, GameInfo
+from app.db.schemas import AccountInfo, PredictInfo, BetterGame
 from . import compare_teams
 from app.core.predict import remove_live, make_path
 import time
@@ -30,7 +30,7 @@ def update(ign):
             # get match from riot and store it
             match = get_match_info.get_match_by_id("NA1_" + prediction.match_id)
             # if already stored
-            if not GameInfo.query.filter_by(matchId="NA1_" + prediction.match_id).first():
+            if not BetterGame.query.filter_by(match_id="NA1_" + prediction.match_id).first():
                 get_match_info.store_match_in_db(match)
             # remove it from files if still in it
             file = make_path(prediction.match_id)

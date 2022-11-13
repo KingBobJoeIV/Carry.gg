@@ -1,3 +1,4 @@
+# this is unused
 from app.db import db
 from sqlalchemy.dialects.postgresql import TEXT
 
