@@ -6,7 +6,7 @@ IS_PROD = environ.get("IS_PROD") is not None
 
 if not IS_PROD:
     print("assuming dev environment, add `IS_PROD` to your env to switch to dev")
-RIOT_API_KEY = environ.get("API_KEY")
+RIOT_API_KEY = environ.get("RIOT_API_KEY")
 
 # JWT Signing key, make sure this stays same or every user will need to relogin
 SIGNING_KEY = environ.get("JWT_SIGNING_KEY")
