@@ -92,3 +92,40 @@ def normalize_rank(rank, tier, lp):
         res += (lp // 200)
     return min(res / constants.RANK_BINS, 1)
 
+
+def create_blob_entry(champ_role, data, team_data):
+    # key = champ_role, val = [participant data, count]
+    return {champ_role: [transform_data(data, team_data), 1]}
+
+
+def update_blob_entry(champ_role, to_add, current):
+    print("updating", champ_role)
+    current[champ_role] = [[(current[champ_role][0][i] + to_add[champ_role][0][i])/(current[champ_role][1] + 1) for i in range(len(to_add[champ_role][0]))], current[champ_role][1] + 1]
+    print("current after:", current)
+    return current
+
+
+# todo
+#towers,inhibs,first_inhib,dragons,barons,first_baron,kda,first_tower,heralds,first_drag,first_herald,fb,neutralMinionsKilled
+#damageDealtToBuildings(maybe cut out)
+#damageDealtToTurrets(maybe cut out)
+#visionScore
+#totalUnitsHealed
+#totalMinionsKilled
+#timeccingothers
+#totaltimeccdealt
+def transform_data(data, team_data):
+    print("data:", data)
+    towers = team_data["objectives"]["tower"]["kills"]
+    inhibs = team_data["objectives"]["inhibitor"]["kills"]
+    first_inhib = int(team_data["objectives"]["inhibitor"]["first"])
+    dragons = team_data["objectives"]["dragon"]["kills"]
+    barons = team_data["objectives"]["baron"]["kills"]
+    kda = data["challenges"]["kda"]
+    first_tower = int(team_data["objectives"]["tower"]["first"])
+    heralds = team_data["objectives"]["riftHerald"]["kills"]
+    first_drag = int(team_data["objectives"]["dragon"]["first"])
+    first_herald = int(team_data["objectives"]["riftHerald"]["first"])
+    fb = int(team_data["objectives"]["champion"]["first"])
+    neutralMinionsKilled = data["neutralMinionsKilled"]
+    return [towers, inhibs, first_inhib, dragons, barons, kda, first_tower, heralds, first_drag, first_herald, fb, neutralMinionsKilled]

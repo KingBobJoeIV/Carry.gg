@@ -1,7 +1,8 @@
-from . import constants
+from . import constants, get_match_info
 from .watcher import lol_watcher
 from app.db import db
-from app.db.schemas import AccountInfo
+from app.db.schemas import PlayerInfo
+# from get_match_info import store_match_in_db, get_all_matches
 import json
 from pathlib import Path
 from app.internal.caching.response_caching import cache
@@ -12,7 +13,7 @@ import math
 # todo needs to be updated every patch
 # @cache
 def map_id_to_champ():
-    p=Path("./app/ddragon_12_21_1_champ_data.json").resolve()
+    p=Path("./app/ddragon_12_23_1_champ_data.json").resolve()
     print(p)
     f = open(p)
     data = json.load(f)
@@ -51,33 +52,37 @@ def get_all_mastery(summonerId):
     return lol_watcher.champion_mastery.by_summoner(constants.MY_REGION, summonerId)
 
 
-def store_account_in_db(puuid):
-    account_fields = ["accountId", "profileIconId", "revisionDate", "name", "id",
-                      "puuid", "summonerLevel", "championId", "championPoints",
-                      "championLevel", "tier", "rank", "leaguePoints", "wins", "losses"]
+def store_player_in_db(puuid):
     curr = get_info(puuid)
+    print("main player storing:", curr["name"])
     # replace revisionDate with current time
     curr["revisionDate"] = math.floor(time.time() * 1000)
-    info = AccountInfo.query.filter_by(puuid=puuid).first()
-    # print(curr["revisionDate"], info.revisionDate)
-    # print(curr["revisionDate"] - info.revisionDate)
+    # check to see if account is already stored in db
+    info = PlayerInfo.query.filter_by(puuid=puuid).first()
+    # create a new row for the account
     if not info:
         mastery = get_all_mastery(curr["id"])[0]
         league = get_rank_info(curr["id"])
         if not league:
             league = []
-        row = AccountInfo(curr, mastery, league)
+        row = PlayerInfo(curr, mastery, league, {}, {})
         db.session.add(row)
     # if it has been at least 2 minutes since last update, update info
     elif curr["revisionDate"] - info.revisionDate > 120000:
-        mastery = get_all_mastery(curr["id"])[0]
-        league = get_rank_info(curr["id"])
-        if not league:
-            league = []
-        row = AccountInfo(curr, mastery, league)
-        print("Updating:", curr["name"])
-        for field in account_fields:
-            setattr(info, field, getattr(row, field))
+        # all matches the player has played
+        all_matches = set(get_match_info.get_all_matches(puuid))
+        # matches that are stored
+        temp = info.matchlist
+        stored = set()
+        for t in temp.keys():
+            stored.add(t)
+        print("all:", len(all_matches), all_matches)
+        print("stored:", len(stored), stored)
+        # set difference, store new matches
+        for match in all_matches - stored:
+            print("looping through match:", match)
+            get_match_info.store_match_in_db(match)
+        print("Updated:", curr["name"])
     db.session.commit()
     return (info or row).as_json
 

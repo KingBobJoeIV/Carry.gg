@@ -7,7 +7,7 @@ class BetterGame(db.Model):
     gameDuration: int = db.Column(db.Integer)
     gameStartTimestamp: str = db.Column(db.TEXT, nullable=False)
     gameVersion: str = db.Column(db.TEXT, nullable=False)
-    win: bool = db.Column(db.Boolean)
+    win: str = db.Column(db.TEXT, nullable=False)
     # puuids
     participantOne: str = db.Column(db.TEXT, nullable=False)
     participantTwo: str = db.Column(db.TEXT, nullable=False)
@@ -48,7 +48,10 @@ class BetterGame(db.Model):
         self.gameStartTimestamp = start
         self.gameDuration = duration
         self.gameVersion = version
-        self.win = participants[0]["win"]
+        if participantDumps[0]["win"]:
+            self.win = "Team 1"
+        else:
+            self.win = "Team 2"
         # puuids
         self.participantOne = participants[0]
         self.participantTwo = participants[1]

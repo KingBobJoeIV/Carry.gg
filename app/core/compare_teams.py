@@ -31,17 +31,19 @@ def compare_teams(gameId, team1, team2, t1_ranks, t2_ranks):
     return gameId, t1_score, t2_score, t1_percent, t2_percent
 
 
-def store_prediction_in_db(match_id, ids, prediction, actual, chance):
-    row = PredictInfo(match_id, ids, prediction, actual, chance)
+def store_prediction_in_db(match_id, duration, start, ids, prediction, actual, chance):
+    row = PredictInfo(match_id, duration, start, ids, prediction, actual, chance)
     db.session.add(row)
     db.session.commit()
+    print("stored prediction:", match_id)
     return row.as_json
 
 
-def update_prediction_db(match_id, actual):
+def update_prediction_db(match_id, actual, duration):
     row = PredictInfo.query.filter_by(match_id=str(match_id)).first()
     if row:
         row.actualWinner = actual
+        row.gameDuration = duration
         db.session.commit()
         return row.as_json
 

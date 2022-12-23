@@ -1,12 +1,12 @@
 from flask import Blueprint, render_template, request, current_app, stream_with_context
 from app.decorators.api_response import api
 from app.core.predict import predict, get_account_info, make_path
-from app.core.update import update, update_account_table
+from app.core.update import update
 from app.core.get_account_info import get_all_mastery, get_rank_info, determine_level_image
 from app.core.get_match_info import check_if_in_game, calculate_game_time, get_live_match
 from app.imageinfo import imageinfo
 from app.db import db
-from app.db.schemas import PredictInfo, AccountInfo, BetterGame
+from app.db.schemas import PredictInfo, PlayerInfo
 from threading import Thread
 from time import sleep, time
 import json
@@ -79,11 +79,9 @@ def profile_page(ign):
     pred = []
     # todo game
     for p in predictions:
-        game = BetterGame.query.filter_by(match_id="NA1_" + p.match_id).first()
-        if not game:
+        game_info = p.gameDuration
+        if game_info == 0:
             game_info = ["In Progress", ""]
-        else:
-            game_info = calculate_game_time(game.gameStartTimestamp, game.gameDuration)
         players = p.ids.strip('][').split(',')
         count = 0
         team1 = []
@@ -91,20 +89,20 @@ def profile_page(ign):
         for player in players:
             player = player.replace("'", "").replace(" ", "")
             if count < 5:
-                team1.append(AccountInfo.query.filter_by(id=player).first().name)
+                team1.append(PlayerInfo.query.filter_by(id=player).first().name)
             else:
-                team2.append(AccountInfo.query.filter_by(id=player).first().name)
+                team2.append(PlayerInfo.query.filter_by(id=player).first().name)
             count += 1
             color = "#c04840cc"
             if p.actualWinner == "Pending":
                 color = "#7d7d7dcc"
             elif p.predictedWinner == p.actualWinner:
                 color = "#07963e99"
-        if not game:
+        if game_info == 0:
             pred.append((float("-inf"), [game_info, team1, team2, p.predictedWinner, p.actualWinner,
                                   str(round(p.predictedChance * 100, 2)) + "%", color]))
         else:
-            pred.append((-int(game.gameStartTimestamp), [game_info, team1, team2, p.predictedWinner, p.actualWinner,
+            pred.append((-int(p.gameStartTimestamp), [game_info, team1, team2, p.predictedWinner, p.actualWinner,
                                         str(round(p.predictedChance * 100, 2)) + "%", color]))
     pred.sort(key=lambda x: x[0])
     for i in range(len(pred)):
