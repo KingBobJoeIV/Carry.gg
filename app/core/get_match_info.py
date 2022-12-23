@@ -1,3 +1,4 @@
+import datetime
 import time
 
 from humanfriendly import format_timespan
@@ -64,28 +65,28 @@ def get_participant(id, match):
 def store_match_in_db(match):
     # get individual participant info
     matchid = match
-    print("trying to store:", matchid)
+    print("trying to store:", matchid, "started at:", str(datetime.datetime.fromtimestamp(time.time())))
     match = get_match_by_id(matchid)
     puuids = match["metadata"]["participants"]
     participants = match["info"]["participants"]
-    account_fields = ["accountId", "profileIconId", "revisionDate", "name", "id",
-                      "puuid", "summonerLevel", "championId", "championPoints",
-                      "championLevel", "tier", "rank", "leaguePoints", "wins", "losses", "blob", "matchlist"]
+    # account_fields = ["accountId", "profileIconId", "revisionDate", "name", "id",
+    #                   "puuid", "summonerLevel", "championId", "championPoints",
+    #                   "championLevel", "tier", "rank", "leaguePoints", "wins", "losses", "blob", "matchlist"]
     count = 0
     for puuid in puuids:
         curr = get_account_info.get_info(puuid)
         info = PlayerInfo.query.filter_by(puuid=puuid).first()
-        mastery = get_account_info.get_all_mastery(curr["id"])[0]
-        league = get_account_info.get_rank_info(curr["id"])
         if count < 5:
             team = match["info"]["teams"][0]
         else:
             team = match["info"]["teams"][1]
-        if not league:
-            league = []
         # new player in db
         if not info:
             champ_role = str(participants[count]["championId"]) + ", " + participants[count]["teamPosition"]
+            mastery = get_account_info.get_all_mastery(curr["id"])[0]
+            league = get_account_info.get_rank_info(curr["id"])
+            if not league:
+                league = []
             blob = calculate_weights.create_blob_entry(champ_role, participants[count], team)
             row = PlayerInfo(curr, mastery, league, blob, {matchid: True})
             db.session.add(row)
@@ -96,22 +97,20 @@ def store_match_in_db(match):
                 blob = calculate_weights.create_blob_entry(champ_role, participants[count], team)
                 temp = info.matchlist
                 if champ_role in info.blob:
-                    blob = calculate_weights.update_blob_entry(champ_role, blob, info.blob)
-                    temp[matchid] = True
-                    row = PlayerInfo(curr, mastery, league, blob, temp)
+                    temp_blob = calculate_weights.update_blob_entry(champ_role, blob, info.blob)
                 else:
                     temp_blob = info.blob
                     temp_blob[champ_role] = blob[champ_role]
-                    temp[matchid] = True
-                    row = PlayerInfo(curr, mastery, league, temp_blob, temp)
+                temp[matchid] = True
                 print("Adding match to: ", curr["name"])
-                for field in account_fields:
-                    setattr(info, field, getattr(row, field))
-                    flag_modified(info, field)
+                setattr(info, "blob", temp_blob)
+                setattr(info, "matchlist", temp)
+                flag_modified(info, "blob")
+                flag_modified(info, "matchlist")
                 db.session.commit()
         count += 1
     db.session.commit()
-    print("stored:", matchid)
+    print("stored:", matchid, "at:", str(datetime.datetime.fromtimestamp(time.time())))
 
 
 def get_stored_by_champ_role(participant, champ_role):

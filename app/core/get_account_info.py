@@ -1,3 +1,5 @@
+import datetime
+
 from . import constants, get_match_info
 from .watcher import lol_watcher
 from app.db import db
@@ -54,7 +56,7 @@ def get_all_mastery(summonerId):
 
 def store_player_in_db(puuid):
     curr = get_info(puuid)
-    print("main player storing:", curr["name"])
+    print("main player storing:", curr["name"], "started at", str(datetime.datetime.fromtimestamp(time.time())))
     # replace revisionDate with current time
     curr["revisionDate"] = math.floor(time.time() * 1000)
     # check to see if account is already stored in db
@@ -79,7 +81,7 @@ def store_player_in_db(puuid):
         # set difference, store new matches
         for match in all_matches - stored:
             get_match_info.store_match_in_db(match)
-    print("Updated:", curr["name"])
+    print("Updated:", curr["name"], "finished at:", str(datetime.datetime.fromtimestamp(time.time())))
     db.session.commit()
     return (info or row).as_json
 
