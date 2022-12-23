@@ -10,6 +10,7 @@ from app.db.schemas import PredictInfo, PlayerInfo
 from app.internal.roleidentification import pull_data, get_roles
 from pathlib import Path
 import os
+from sklearn.linear_model import LogisticRegression
 # from cachetools import cached, TTLCache
 # from app.internal.caching.response_caching import cache
 
@@ -69,14 +70,10 @@ def predict(ign, app):
     for p in participants:
         p = p["summonerId"]
         participant_id_mapping[p] = get_account_info.get_puuid_from_id(p)
-    team1 = []
-    team2 = []
     team1_members = []
     team2_members = []
     team1_roles = {}
     team2_roles = {}
-    team1_ranks = []
-    team2_ranks = []
     counter = 0
     # todo dont need to do this if i do by champ? maybe still have to
     # map id to champ id
@@ -94,6 +91,8 @@ def predict(ign, app):
     counter = 0
     # start time
     print("Start:", datetime.datetime.fromtimestamp(time.time()))
+    # vector containing prediction data p1, p2, ..., p10
+    X = []
     for participant in participant_id_mapping.values():
         # todo dont have to deal with this if i use champ ids
         if counter < 5:
@@ -105,45 +104,32 @@ def predict(ign, app):
         # fetch and update/add curr_account to accountinfo table
         get_account_info.store_player_in_db(participant)
         curr_player_info = PlayerInfo.query.filter_by(puuid=participant).first()
-        # get matches, calculate weights, get current champion mastery, and assign each participant to a team
-        # todo use matches by current champ(now!)
         # fetch all matches that the user has played by current champ in current role and use for calculations
         champ_role = str(current_participant_champ) + ", " + role
-        participant_stored_matches = get_match_info.get_stored_by_champ_role(participant, champ_role)
-        current_participant_weights = calculate_weights.calculate_weights(participant_stored_matches, participant)
-        # this is done in memory, don't store current champ mastery, return 0 if first time
-        try:
-            current_participant_mastery = get_account_info.get_mastery_for_champ(curr_player_info.id, current_participant_champ)
-        except:
-            current_participant_mastery = 0
-        # first 5 members in t1, last 5 in t2
-        if counter < 5:
-            team1.append(calculate_weights.normalize_stats(
-                calculate_weights.bin_stats([current_participant_mastery] + current_participant_weights)))
-            team1_members.append(curr_player_info.name)
-            team1_ranks.append(calculate_weights.normalize_rank(curr_player_info.rank, curr_player_info.tier, curr_player_info.leaguePoints))
+        data = None
+        # get data for the current champ_role from db; if never played set all vals to 0
+        data = curr_player_info.blob[champ_role]
+        if data is not None:
+            X.extend(data[0])
         else:
-            team2.append(calculate_weights.normalize_stats(
-                calculate_weights.bin_stats([current_participant_mastery] + current_participant_weights)))
-            team2_members.append(curr_player_info.name)
-            team2_ranks.append(calculate_weights.normalize_rank(curr_player_info.rank, curr_player_info.tier, curr_player_info.leaguePoints))
+            X.extend([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
         counter += 1
         # fetch time of one participant
         print(curr_player_info.name + "'s games fetched at: " + str(datetime.datetime.fromtimestamp(time.time())))
-    # print(type(curr_match["gameId"]))
-    scores = compare_teams.compare_teams(str(curr_match["gameId"]), team1, team2, team1_ranks, team2_ranks)
-    print("gameId:", scores[0])
+    # make the prediction
+    res = constants.model.predict(X)
+    print("gameId:", curr_match["gameId"])
     print("Team 1:", team1_members)
-    print("Team 1 Score:", scores[1])
     print("VS")
     print("Team 2:", team2_members)
-    print("Team 2 Score:", scores[2])
-    print("Team 1 Win Percentage:", scores[3])
-    print("Team 2 Win Percentage:", scores[4])
-    if scores[1] > scores[2]:
-        compare_teams.store_prediction_in_db(scores[0], 0, curr_match["gameStartTime"], str(list(participant_id_mapping.keys())), "Team 1", "Pending", scores[3])
+    print("Team 1 Win Percentage:", 1-res)
+    print("Team 2 Win Percentage:", res)
+    if res < .5:
+        compare_teams.store_prediction_in_db(curr_match["gameId"], 0, curr_match["gameStartTime"],
+                                             str(list(participant_id_mapping.keys())), "Team 1", "Pending", 1-res)
     else:
-        compare_teams.store_prediction_in_db(scores[0], 0, curr_match["gameStartTime"], str(list(participant_id_mapping.keys())), "Team 2", "Pending", scores[4])
+        compare_teams.store_prediction_in_db(curr_match["gameId"], 0, curr_match["gameStartTime"],
+                                             str(list(participant_id_mapping.keys())), "Team 2", "Pending", res)
     # remove finished prediction from files
     remove_live(curr_match["gameId"])
-    return scores
+    return res
