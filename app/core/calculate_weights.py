@@ -1,13 +1,13 @@
 from .watcher import lol_watcher
-from . import constants, get_match_info, get_account_info
+from . import constants, get_match_info
 import numpy as np
 from app.internal.caching.response_caching import cache
 
 
 # todo this is unused
-@cache(lambda x,y:x+y,json_cache=True)
-def mby_id(region,match):
-    print(region,match)
+@cache(lambda x, y: x + y, json_cache=True)
+def mby_id(region, match):
+    print(region, match)
     a = lol_watcher.match.by_id(region, match)
     return a
 
@@ -31,7 +31,7 @@ def normalize_stats(data):
     data[2] = min(data[2] / constants.DEATH_BINS, 1)
     data[3] = min(data[3] / constants.ASSIST_BINS, 1)
     data[4] = min(data[4] / constants.CS_BINS, 1)
-    data[5] = int(data[5]) # convert boolean value of winner
+    data[5] = int(data[5])  # convert boolean value of winner
     # data[6] = min(data[6] / constants.GOLD_BINS, 1)
     # data[7] = min(data[7] / constants.VISION_BINS, 1)
     # data[8] = min(data[8] / constants.TIME_DEAD_BINS, 1)
@@ -98,22 +98,31 @@ def create_blob_entry(champ_role, data, team_data):
     return {champ_role: [transform_data(data, team_data), 1]}
 
 
-def update_blob_entry(champ_role, to_add, current):
-    print("updating", champ_role)
-    current[champ_role] = [[(current[champ_role][0][i] + to_add[champ_role][0][i])/(current[champ_role][1] + 1) for i in range(len(to_add[champ_role][0]))], current[champ_role][1] + 1]
-    print("current after:", current)
-    return current
+def merge_blobs(blobs):
+    res = {}
+    for blob in blobs:
+        for k in blob.keys():
+            if k not in res:
+                res[k] = blob[k]
+            else:
+                res[k] = [[(res[k][0][i] + blob[k][0][i])/(res[k][1]+1) for i in range(len(blob[k][0]))], res[k][1]+1]
+    return res
 
+
+def merge_dicts(x, y):
+    z = x.copy()
+    z.update(y)
+    return z
 
 # todo
-#towers,inhibs,first_inhib,dragons,barons,first_baron,kda,first_tower,heralds,first_drag,first_herald,fb,neutralMinionsKilled
-#damageDealtToBuildings(maybe cut out)
-#damageDealtToTurrets(maybe cut out)
-#visionScore
-#totalUnitsHealed
-#totalMinionsKilled
-#timeccingothers
-#totaltimeccdealt
+# towers,inhibs,first_inhib,dragons,barons,first_baron,kda,first_tower,heralds,first_drag,first_herald,fb,neutralMinionsKilled
+# damageDealtToBuildings(maybe cut out)
+# damageDealtToTurrets(maybe cut out)
+# visionScore
+# totalUnitsHealed
+# totalMinionsKilled
+# timeccingothers
+# totaltimeccdealt
 def transform_data(data, team_data):
     towers = team_data["objectives"]["tower"]["kills"]
     inhibs = team_data["objectives"]["inhibitor"]["kills"]
@@ -127,4 +136,5 @@ def transform_data(data, team_data):
     first_herald = int(team_data["objectives"]["riftHerald"]["first"])
     fb = int(team_data["objectives"]["champion"]["first"])
     neutralMinionsKilled = data["neutralMinionsKilled"]
-    return [towers, inhibs, first_inhib, dragons, barons, kda, first_tower, heralds, first_drag, first_herald, fb, neutralMinionsKilled]
+    return [towers, inhibs, first_inhib, dragons, barons, kda, first_tower, heralds, first_drag, first_herald, fb,
+            neutralMinionsKilled]

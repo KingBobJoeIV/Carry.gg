@@ -26,9 +26,8 @@ def update(ign):
     pending = PredictInfo.query.filter(PredictInfo.ids.contains(account["id"])).filter_by(actualWinner="Pending").all()
     for prediction in pending:
         try:
-            # get match from riot and store it
+            # get match from riot
             match = get_match_info.get_match_by_id("NA1_" + prediction.match_id)
-            get_match_info.store_match_in_db(match)
             # remove it from files if still in it
             file = make_path(prediction.match_id)
             if file.is_file():

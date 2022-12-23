@@ -93,8 +93,9 @@ def predict(ign, app):
     print("Start:", datetime.datetime.fromtimestamp(time.time()))
     # vector containing prediction data p1, p2, ..., p10
     X = []
+    print(participant_id_mapping.values())
+    exit()
     for participant in participant_id_mapping.values():
-        # todo dont have to deal with this if i use champ ids
         if counter < 5:
             current_participant_champ = team1_roles[get_key(participant_id_mapping, participant)]
             role = get_key(team1_role_res, current_participant_champ)

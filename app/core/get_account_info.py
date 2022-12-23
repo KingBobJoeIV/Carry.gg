@@ -1,5 +1,5 @@
 import datetime
-
+import threading
 from . import constants, get_match_info
 from .watcher import lol_watcher
 from app.db import db
@@ -69,20 +69,27 @@ def store_player_in_db(puuid):
             league = []
         row = PlayerInfo(curr, mastery, league, {}, {})
         db.session.add(row)
+        db.session.commit()
+        # todo do this on a diff thread
+        all_matches = get_match_info.get_all_matches(puuid)
+        to_store = []
+        for match in all_matches:
+            to_store.append(get_match_info.process_match(match, puuid))
+        if all_matches:
+            get_match_info.store_blobs_in_db(all_matches, to_store, puuid)
     # if it has been at least 2 minutes since last update, update info
     elif curr["revisionDate"] - info.revisionDate > 120000:
-        # all matches the player has played
-        all_matches = set(get_match_info.get_all_matches(puuid))
-        # matches that are stored
-        temp = info.matchlist
-        stored = set()
-        for t in temp.keys():
-            stored.add(t)
-        # set difference, store new matches
-        for match in all_matches - stored:
-            get_match_info.store_match_in_db(match)
+        # all matches the player has played since last revision date or szn start
+        all_matches = get_match_info.get_all_matches(puuid, info.revisionDate//1000)
+        # todo buffering(cache) + threading
+        to_store = []
+        matchlist = []
+        for match in all_matches:
+            to_store.append(get_match_info.process_match(match, puuid))
+            matchlist.append(match)
+        if all_matches:
+            get_match_info.store_blobs_in_db(matchlist, to_store, puuid)
     print("Updated:", curr["name"], "finished at:", str(datetime.datetime.fromtimestamp(time.time())))
-    db.session.commit()
     return (info or row).as_json
 
 

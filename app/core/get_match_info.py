@@ -5,7 +5,7 @@ from humanfriendly import format_timespan
 from sqlalchemy import or_
 from sqlalchemy.orm.attributes import flag_modified
 from app.db import db
-from app.db.schemas import BetterGame, PlayerInfo
+from app.db.schemas import PlayerInfo
 from . import constants, calculate_weights, get_account_info
 # from calculate_weights import create_blob_entry, update_blob_entry
 # from get_account_info import get_all_mastery, get_rank_info, get_info
@@ -13,11 +13,11 @@ from .watcher import lol_watcher
 
 
 # get all ranked matches from current season
-def get_all_matches(puuid):
+def get_all_matches(puuid, beg=constants.SZN_START):
     start = 0
     total = []
     while True:
-        r = get_matches(puuid, constants.SZN_START, start, 100)
+        r = get_matches(puuid, beg, start, 100)
         if not r:
             break
         total.extend(r)
@@ -62,83 +62,72 @@ def get_participant(id, match):
             return p
 
 
-def store_match_in_db(match):
-    # get individual participant info
+# given blobs for a player, store in db
+def store_blobs_in_db(matchlist, blobs, puuid):
+    print("trying to store:", puuid, "started at:", str(datetime.datetime.fromtimestamp(time.time())))
+    to_store = calculate_weights.merge_blobs(blobs)
+    info = PlayerInfo.query.filter_by(puuid=puuid).first()
+    if not info:
+        curr = get_account_info.get_info(puuid)
+        mastery = get_account_info.get_all_mastery(curr["id"])[0]
+        league = get_account_info.get_rank_info(curr["id"])
+        if not league:
+            league = []
+        row = PlayerInfo(curr, mastery, league, to_store, {matchlist[i]: True for i in range(len(matchlist))})
+        db.session.add(row)
+        print("new row created for:", curr["name"])
+    else:
+        to_store = calculate_weights.merge_blobs([to_store, info.blob])
+        setattr(info, "blob", to_store)
+        setattr(info, "matchlist", calculate_weights.merge_dicts(info.matchlist, {matchlist[i]: True for i in range(len(matchlist))}))
+        flag_modified(info, "blob")
+        flag_modified(info, "matchlist")
+    db.session.commit()
+    print("stored:", puuid, "at:", str(datetime.datetime.fromtimestamp(time.time())))
+
+
+# generate matchid, blob for given player
+def process_match(match, puuid):
     matchid = match
-    print("trying to store:", matchid, "started at:", str(datetime.datetime.fromtimestamp(time.time())))
+    print("trying to process:", matchid, "started at:", str(datetime.datetime.fromtimestamp(time.time())))
     match = get_match_by_id(matchid)
     puuids = match["metadata"]["participants"]
+    ind = puuids.index(puuid)
     participants = match["info"]["participants"]
-    # account_fields = ["accountId", "profileIconId", "revisionDate", "name", "id",
-    #                   "puuid", "summonerLevel", "championId", "championPoints",
-    #                   "championLevel", "tier", "rank", "leaguePoints", "wins", "losses", "blob", "matchlist"]
-    count = 0
-    for puuid in puuids:
-        curr = get_account_info.get_info(puuid)
-        info = PlayerInfo.query.filter_by(puuid=puuid).first()
-        if count < 5:
-            team = match["info"]["teams"][0]
-        else:
-            team = match["info"]["teams"][1]
-        # new player in db
-        if not info:
-            champ_role = str(participants[count]["championId"]) + ", " + participants[count]["teamPosition"]
-            mastery = get_account_info.get_all_mastery(curr["id"])[0]
-            league = get_account_info.get_rank_info(curr["id"])
-            if not league:
-                league = []
-            blob = calculate_weights.create_blob_entry(champ_role, participants[count], team)
-            row = PlayerInfo(curr, mastery, league, blob, {matchid: True})
-            db.session.add(row)
-        else:
-            # add match if not already in player's matchlist
-            if matchid not in info.matchlist:
-                champ_role = str(participants[count]["championId"]) + ", " + participants[count]["teamPosition"]
-                blob = calculate_weights.create_blob_entry(champ_role, participants[count], team)
-                temp = info.matchlist
-                if champ_role in info.blob:
-                    temp_blob = calculate_weights.update_blob_entry(champ_role, blob, info.blob)
-                else:
-                    temp_blob = info.blob
-                    temp_blob[champ_role] = blob[champ_role]
-                temp[matchid] = True
-                print("Adding match to: ", curr["name"])
-                setattr(info, "blob", temp_blob)
-                setattr(info, "matchlist", temp)
-                flag_modified(info, "blob")
-                flag_modified(info, "matchlist")
-                db.session.commit()
-        count += 1
-    db.session.commit()
-    print("stored:", matchid, "at:", str(datetime.datetime.fromtimestamp(time.time())))
+    champ_role = str(participants[ind]["championId"]) + ", " + participants[ind]["teamPosition"]
+    if match["info"]["gameDuration"] <= 180:
+        print(matchid, "was a remake")
+        return {champ_role: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0]}
+    print("processed:", matchid, "at:", str(datetime.datetime.fromtimestamp(time.time())))
+    return calculate_weights.create_blob_entry(champ_role, participants[ind], match["info"]["teams"][ind // 5])
 
+# outdated
+# def get_stored_by_champ_role(participant, champ_role):
+#     role = champ_role.split(",")[1]
+#     print("Role:", role)
+#     if role == " TOP":
+#         return BetterGame.query.filter(or_(BetterGame.participantOne == participant, BetterGame.participantOneChamp == champ_role),
+#                                        or_(BetterGame.participantSix == participant, BetterGame.participantSixChamp == champ_role)).all()
+#     elif role == " JUNGLE":
+#         return BetterGame.query.filter(or_(BetterGame.participantTwo == participant, BetterGame.participantTwoChamp == champ_role),
+#                                        or_(BetterGame.participantSeven == participant, BetterGame.participantSevenChamp == champ_role)).all()
+#     elif role == " MID":
+#         return BetterGame.query.filter(or_(BetterGame.participantThree == participant, BetterGame.participantThreeChamp == champ_role),
+#                                        or_(BetterGame.participantEight == participant, BetterGame.participantEightChamp == champ_role)).all()
+#     elif role == " BOTTOM":
+#         return BetterGame.query.filter(or_(BetterGame.participantFour == participant, BetterGame.participantFourChamp == champ_role),
+#                                        or_(BetterGame.participantNine == participant, BetterGame.participantNineChamp == champ_role)).all()
+#     elif role == " UTILITY":
+#         return BetterGame.query.filter(or_(BetterGame.participantFive == participant, BetterGame.participantFiveChamp == champ_role),
+#                                        or_(BetterGame.participantTen == participant, BetterGame.participantTenChamp == champ_role)).all()
 
-def get_stored_by_champ_role(participant, champ_role):
-    role = champ_role.split(",")[1]
-    print("Role:", role)
-    if role == " TOP":
-        return BetterGame.query.filter(or_(BetterGame.participantOne == participant, BetterGame.participantOneChamp == champ_role),
-                                       or_(BetterGame.participantSix == participant, BetterGame.participantSixChamp == champ_role)).all()
-    elif role == " JUNGLE":
-        return BetterGame.query.filter(or_(BetterGame.participantTwo == participant, BetterGame.participantTwoChamp == champ_role),
-                                       or_(BetterGame.participantSeven == participant, BetterGame.participantSevenChamp == champ_role)).all()
-    elif role == " MID":
-        return BetterGame.query.filter(or_(BetterGame.participantThree == participant, BetterGame.participantThreeChamp == champ_role),
-                                       or_(BetterGame.participantEight == participant, BetterGame.participantEightChamp == champ_role)).all()
-    elif role == " BOTTOM":
-        return BetterGame.query.filter(or_(BetterGame.participantFour == participant, BetterGame.participantFourChamp == champ_role),
-                                       or_(BetterGame.participantNine == participant, BetterGame.participantNineChamp == champ_role)).all()
-    elif role == " UTILITY":
-        return BetterGame.query.filter(or_(BetterGame.participantFive == participant, BetterGame.participantFiveChamp == champ_role),
-                                       or_(BetterGame.participantTen == participant, BetterGame.participantTenChamp == champ_role)).all()
-
-
-def update_matches(matchlist):
-    for match in matchlist:
-        info = BetterGame.query.filter_by(match_id=str(match)).first()
-        # if match is not in db
-        if not info:
-            store_match_in_db(get_match_by_id(match))
+# outdated
+# def update_matches(matchlist):
+#     for match in matchlist:
+#         info = BetterGame.query.filter_by(match_id=str(match)).first()
+#         # if match is not in db
+#         if not info:
+#             store_match_in_db(get_match_by_id(match))
 
 
 def check_if_in_game(id):
