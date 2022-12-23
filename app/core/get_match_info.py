@@ -65,7 +65,6 @@ def store_match_in_db(match):
     # get individual participant info
     matchid = match
     print("trying to store:", matchid)
-    print(type(matchid))
     match = get_match_by_id(matchid)
     puuids = match["metadata"]["participants"]
     participants = match["info"]["participants"]
@@ -74,7 +73,6 @@ def store_match_in_db(match):
                       "championLevel", "tier", "rank", "leaguePoints", "wins", "losses", "blob", "matchlist"]
     count = 0
     for puuid in puuids:
-        print("count", count)
         curr = get_account_info.get_info(puuid)
         info = PlayerInfo.query.filter_by(puuid=puuid).first()
         mastery = get_account_info.get_all_mastery(curr["id"])[0]
@@ -93,35 +91,23 @@ def store_match_in_db(match):
             db.session.add(row)
         else:
             # add match if not already in player's matchlist
-            print("dup:", info.matchlist)
-            print("curr match_id:", matchid)
             if matchid not in info.matchlist:
                 champ_role = str(participants[count]["championId"]) + ", " + participants[count]["teamPosition"]
                 blob = calculate_weights.create_blob_entry(champ_role, participants[count], team)
-                print("blob to add:", blob)
-                print("info blobl:", info.blob)
                 temp = info.matchlist
-                print("tempbefore:", temp)
                 if champ_role in info.blob:
                     blob = calculate_weights.update_blob_entry(champ_role, blob, info.blob)
                     temp[matchid] = True
-                    print("temp1after:", temp)
                     row = PlayerInfo(curr, mastery, league, blob, temp)
-                    print("new blob:", blob)
                 else:
                     temp_blob = info.blob
                     temp_blob[champ_role] = blob[champ_role]
                     temp[matchid] = True
-                    print("temp2after:", temp)
                     row = PlayerInfo(curr, mastery, league, temp_blob, temp)
-                    print("new blob:", temp_blob)
                 print("Adding match to: ", curr["name"])
                 for field in account_fields:
                     setattr(info, field, getattr(row, field))
                     flag_modified(info, field)
-                print("infoblob:", info.blob)
-                print("infomatch:", info.matchlist)
-                print("name", info.name)
                 db.session.commit()
         count += 1
     db.session.commit()

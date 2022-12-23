@@ -76,13 +76,10 @@ def store_player_in_db(puuid):
         stored = set()
         for t in temp.keys():
             stored.add(t)
-        print("all:", len(all_matches), all_matches)
-        print("stored:", len(stored), stored)
         # set difference, store new matches
         for match in all_matches - stored:
-            print("looping through match:", match)
             get_match_info.store_match_in_db(match)
-        print("Updated:", curr["name"])
+    print("Updated:", curr["name"])
     db.session.commit()
     return (info or row).as_json
 

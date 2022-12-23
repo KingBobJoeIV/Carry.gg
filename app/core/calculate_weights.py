@@ -115,7 +115,6 @@ def update_blob_entry(champ_role, to_add, current):
 #timeccingothers
 #totaltimeccdealt
 def transform_data(data, team_data):
-    print("data:", data)
     towers = team_data["objectives"]["tower"]["kills"]
     inhibs = team_data["objectives"]["inhibitor"]["kills"]
     first_inhib = int(team_data["objectives"]["inhibitor"]["first"])
