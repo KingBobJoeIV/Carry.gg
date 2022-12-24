@@ -34,7 +34,7 @@ riotwatcher==3.2.3
 six==1.16.0
 SQLAlchemy==1.4.17
 typing_extensions==4.4.0
-urllib3==1.26.12
+urllib3==1.23
 Werkzeug==2.2.2
 zipp==3.9.0
 
