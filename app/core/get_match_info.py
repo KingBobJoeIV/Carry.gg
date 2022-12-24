@@ -132,6 +132,14 @@ def split_into_threads(mapping, total, split):
     count = 0
     # number of matches per thread; last thread takes remainder
     div = total // split
+    if div == 0:
+        res = {}
+        k = list(mapping.keys())[0]
+        for puuid in mapping[k]:
+            if puuid not in res:
+                res[puuid] = []
+            res[puuid].append(k)
+        return [res]
     res = [{} for _ in range(split)]
     for k in mapping.keys():
         for puuid in mapping[k]:

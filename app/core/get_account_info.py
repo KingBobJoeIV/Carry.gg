@@ -1,5 +1,7 @@
 import datetime
 import threading
+from multiprocessing import Queue, Process
+
 from . import constants, get_match_info
 from .watcher import lol_watcher
 from app.db import db
@@ -70,26 +72,45 @@ def store_player_in_db(puuid):
         row = PlayerInfo(curr, mastery, league, {}, {})
         db.session.add(row)
         db.session.commit()
-        # todo do this on a diff thread
-        all_matches = get_match_info.get_all_matches(puuid)
-        to_store = []
-        for match in all_matches:
-            to_store.append(get_match_info.process_match(match, puuid))
-        if all_matches:
-            get_match_info.store_blobs_in_db(all_matches, to_store, puuid)
+        all_matches = get_match_info.get_matches_for_pred([puuid], [constants.SZN_START])
+        if all_matches[1] != 0:
+            # divide matches evenly across 10 threads
+            splits = get_match_info.split_into_threads(all_matches[0], all_matches[1], constants.NUM_THREADS)
+            to_store = []
+            # execute 10 threads
+            q = Queue()
+            p = [Process(target=get_match_info.process_by_thread, args=(split, q)) for split in splits]
+            for t in p:
+                t.start()
+            for t in p:
+                to_store.append(q.get())
+            for t in p:
+                t.join()
+            # put results of threads into 1 dict
+            final = get_match_info.join_threads(to_store)
+            # store results in db
+            get_match_info.store_blobs_in_db(final[puuid][0], final[puuid][1], puuid)
     # if it has been at least 2 minutes since last update, update info
     elif curr["revisionDate"] - info.revisionDate > 120000:
         # all matches the player has played since last revision date or szn start
-        all_matches = get_match_info.get_all_matches(puuid, info.revisionDate//1000)
-        # todo buffering(cache) + threading
-        to_store = []
-        matchlist = []
-        for match in all_matches:
-            to_store.append(get_match_info.process_match(match, puuid))
-            matchlist.append(match)
-        if all_matches:
-            get_match_info.store_blobs_in_db(matchlist, to_store, puuid)
-        info.revisionDate = curr["revisionDate"]
+        all_matches = get_match_info.get_matches_for_pred([puuid], [info.revisionDate//1000])
+        if all_matches[1] != 0:
+            # divide matches evenly across 10 threads
+            splits = get_match_info.split_into_threads(all_matches[0], all_matches[1], constants.NUM_THREADS)
+            to_store = []
+            # execute 10 threads
+            q = Queue()
+            p = [Process(target=get_match_info.process_by_thread, args=(split, q)) for split in splits]
+            for t in p:
+                t.start()
+            for t in p:
+                to_store.append(q.get())
+            for t in p:
+                t.join()
+            # put results of threads into 1 dict
+            final = get_match_info.join_threads(to_store)
+            # store results in db
+            get_match_info.store_blobs_in_db(final[puuid][0], final[puuid][1], puuid)
     db.session.commit()
     print("Updated:", curr["name"], "finished at:", str(datetime.datetime.fromtimestamp(time.time())))
     return (info or row).as_json

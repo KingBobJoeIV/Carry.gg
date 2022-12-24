@@ -122,10 +122,10 @@ def predict(ign, app):
     # get all matches
     print(times)
     all_matches = get_match_info.get_matches_for_pred(list(participant_id_mapping.values()), times)
-    # divide matches evenly for 5 threads
+    # divide matches evenly across 10 threads
     splits = get_match_info.split_into_threads(all_matches[0], all_matches[1], constants.NUM_THREADS)
     to_store = []
-    # execute n threads
+    # execute 10 threads
     q = Queue()
     p = [Process(target=get_match_info.process_by_thread, args=(split, q)) for split in splits]
     for t in p:
