@@ -25,8 +25,8 @@ class PredictInfo(db.Model):
     def as_json(self):
         return {
             "match_id": self.match_id,
-            "gameDuration": self.duration,
-            "gameStartTimestamp": self.start,
+            "gameDuration": self.gameDuration,
+            "gameStartTimestamp": self.gameStartTimestamp,
             "ids": self.ids,
             "predictedWinner": self.predictedWinner,
             "actualWinner": self.actualWinner,

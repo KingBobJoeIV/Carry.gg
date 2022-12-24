@@ -1,4 +1,5 @@
 import datetime
+import math
 import time
 
 from humanfriendly import format_timespan
@@ -10,6 +11,25 @@ from . import constants, calculate_weights, get_account_info
 # from calculate_weights import create_blob_entry, update_blob_entry
 # from get_account_info import get_all_mastery, get_rank_info, get_info
 from .watcher import lol_watcher
+
+
+# todo can be more efficient with shared matches(save matches with val len > 1)
+# todo maybe thread this? lol
+# gets all matches that need to be processed and # of matches
+def get_matches_for_pred(puuids, times):
+    res = {}
+    total = 0
+    for i in range(len(puuids)):
+        if times[i] is not None:
+            temp = get_all_matches(puuids[i], times[i])
+        else:
+            temp = get_all_matches(puuids[i])
+        total += len(temp)
+        for t in temp:
+            if t not in res:
+                res[t] = []
+            res[t].append(puuids[i])
+    return res, total
 
 
 # get all ranked matches from current season
@@ -74,12 +94,15 @@ def store_blobs_in_db(matchlist, blobs, puuid):
         if not league:
             league = []
         row = PlayerInfo(curr, mastery, league, to_store, {matchlist[i]: True for i in range(len(matchlist))})
+        curr["revisionDate"] = math.floor(time.time() * 1000)
         db.session.add(row)
         print("new row created for:", curr["name"])
     else:
         to_store = calculate_weights.merge_blobs([to_store, info.blob])
+        setattr(info, "revisionDate", math.floor(time.time() * 1000))
         setattr(info, "blob", to_store)
         setattr(info, "matchlist", calculate_weights.merge_dicts(info.matchlist, {matchlist[i]: True for i in range(len(matchlist))}))
+        flag_modified(info, "revisionDate")
         flag_modified(info, "blob")
         flag_modified(info, "matchlist")
     db.session.commit()
@@ -95,11 +118,56 @@ def process_match(match, puuid):
     ind = puuids.index(puuid)
     participants = match["info"]["participants"]
     champ_role = str(participants[ind]["championId"]) + ", " + participants[ind]["teamPosition"]
-    if match["info"]["gameDuration"] <= 180:
+    if match["info"]["gameDuration"] <= 240:
         print(matchid, "was a remake")
         return {champ_role: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0]}
     print("processed:", matchid, "at:", str(datetime.datetime.fromtimestamp(time.time())))
     return calculate_weights.create_blob_entry(champ_role, participants[ind], match["info"]["teams"][ind // 5])
+
+
+# given all matches for a pred, divide evenly across threads
+def split_into_threads(mapping, total, split):
+    print(total, "games to split across", split, "threads")
+    # split = 5 for now
+    count = 0
+    # number of matches per thread; last thread takes remainder
+    div = total // split
+    res = [{} for _ in range(split)]
+    for k in mapping.keys():
+        for puuid in mapping[k]:
+            # thread that handles this match
+            ind = min((count // div), split - 1)
+            if puuid not in res[ind]:
+                res[ind][puuid] = []
+            res[ind][puuid].append(k)
+            count += 1
+    return res
+
+
+# call the process_match function on dict
+def process_by_thread(matches, q):
+    # given: {"id1": [g1, g2], "id2": [g1]}
+    res = {}
+    for puuid in matches.keys():
+        res[puuid] = [[], []]
+        for match in matches[puuid]:
+            res[puuid][0].append(match)
+            res[puuid][1].append(process_match(match, puuid))
+    # return: {"id1": [[g1, g2], [blob1, blob2]], "id2": [[g1], [blob1]]}
+    q.put(res)
+
+
+# given res of all threads, reduce into 1 dict
+def join_threads(all_res):
+    final = {}
+    for res in all_res:
+        for k in res.keys():
+            if k not in final:
+                final[k] = res[k]
+            else:
+                final[k] = [final[k][0] + res[k][0], final[k][1] + res[k][1]]
+    return final
+
 
 # outdated
 # def get_stored_by_champ_role(participant, champ_role):

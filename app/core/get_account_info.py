@@ -89,6 +89,8 @@ def store_player_in_db(puuid):
             matchlist.append(match)
         if all_matches:
             get_match_info.store_blobs_in_db(matchlist, to_store, puuid)
+        info.revisionDate = curr["revisionDate"]
+    db.session.commit()
     print("Updated:", curr["name"], "finished at:", str(datetime.datetime.fromtimestamp(time.time())))
     return (info or row).as_json
 

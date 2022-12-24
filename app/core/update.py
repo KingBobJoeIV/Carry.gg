@@ -20,6 +20,8 @@ def update(ign):
     if account["summonerLevel"] < 30:
         return "toolow"
     # update in account table
+    # todo don't update during a prediction
+
     get_account_info.store_player_in_db(account["puuid"])
     # select * from predict_info where match_id = live_game_id and puuid contains ‘id’
     # find any pending past prediction games and update status

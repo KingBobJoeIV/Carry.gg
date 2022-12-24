@@ -27,6 +27,7 @@ TOTAL_DMG_TAKEN_BINS = ...
 # globals
 home = None
 model = ...
+NUM_THREADS = 10
 # champ/skin info
 SKINS = {}
 CHAMPION_MAPPING = {}

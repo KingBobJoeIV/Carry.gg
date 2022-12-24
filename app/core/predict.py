@@ -1,3 +1,7 @@
+import concurrent.futures
+import pickle
+from multiprocessing import Process, Queue
+import numpy as np
 from . import constants
 from . import get_account_info
 from . import calculate_weights
@@ -92,9 +96,52 @@ def predict(ign, app):
     # start time
     print("Start:", datetime.datetime.fromtimestamp(time.time()))
     # vector containing prediction data p1, p2, ..., p10
-    X = []
+    X = [None for _ in range(10)]
+    role_mat_map = {"TOP": 0, "JUNGLE": 1, "MIDDLE": 2, "BOTTOM": 3, "UTILITY": 4}
     print(participant_id_mapping.values())
-    exit()
+    # figure out last revisionDate for all players
+    times = [None for _ in range(10)]
+    count = 0
+    print("All players' info fetching started at:" + str(datetime.datetime.fromtimestamp(time.time())))
+    # todo prob redundant fix later
+    # create rows for participants
+    for participant in participant_id_mapping.values():
+        info = PlayerInfo.query.filter_by(puuid=participant).first()
+        if not info:
+            curr = get_account_info.get_info(participant)
+            curr["revisionDate"] = constants.SZN_START
+            mastery = get_account_info.get_all_mastery(curr["id"])[0]
+            league = get_account_info.get_rank_info(curr["id"])
+            if not league:
+                league = []
+            row = PlayerInfo(curr, mastery, league, {}, {})
+            db.session.add(row)
+            times[count] = constants.SZN_START
+        else:
+            times[count] = info.revisionDate
+        count += 1
+    db.session.commit()
+    # get all matches
+    print(times)
+    all_matches = get_match_info.get_matches_for_pred(list(participant_id_mapping.values()), times)
+    # divide matches evenly for 5 threads
+    splits = get_match_info.split_into_threads(all_matches[0], all_matches[1], constants.NUM_THREADS)
+    to_store = []
+    # execute n threads
+    q = Queue()
+    p = [Process(target=get_match_info.process_by_thread, args=(split, q)) for split in splits]
+    for t in p:
+        t.start()
+    for t in p:
+        to_store.append(q.get())
+    for t in p:
+        t.join()
+    # put results of threads into 1 dict
+    final = get_match_info.join_threads(to_store)
+    # store results in db
+    print("All players' info updated in db at:" + str(datetime.datetime.fromtimestamp(time.time())))
+    for k in final.keys():
+        get_match_info.store_blobs_in_db(final[k][0], final[k][1], k)
     for participant in participant_id_mapping.values():
         if counter < 5:
             current_participant_champ = team1_roles[get_key(participant_id_mapping, participant)]
@@ -102,35 +149,45 @@ def predict(ign, app):
         else:
             current_participant_champ = team2_roles[get_key(participant_id_mapping, participant)]
             role = get_key(team2_role_res, current_participant_champ)
-        # fetch and update/add curr_account to accountinfo table
-        get_account_info.store_player_in_db(participant)
-        curr_player_info = PlayerInfo.query.filter_by(puuid=participant).first()
         # fetch all matches that the user has played by current champ in current role and use for calculations
+        curr_player_info = PlayerInfo.query.filter_by(puuid=participant).first()
         champ_role = str(current_participant_champ) + ", " + role
-        data = None
         # get data for the current champ_role from db; if never played set all vals to 0
-        data = curr_player_info.blob[champ_role]
-        if data is not None:
-            X.extend(data[0])
+        if counter < 5:
+            try:
+                data = curr_player_info.blob[champ_role]
+                X[role_mat_map[role]] = data[0]
+            except:
+                # todo make constant (12) change everywhere
+                X[role_mat_map[role]] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         else:
-            X.extend([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+            try:
+                data = curr_player_info.blob[champ_role]
+                X[role_mat_map[role] + 5] = data[0]
+            except:
+                X[role_mat_map[role] + 5] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         counter += 1
         # fetch time of one participant
         print(curr_player_info.name + "'s games fetched at: " + str(datetime.datetime.fromtimestamp(time.time())))
     # make the prediction
-    res = constants.model.predict(X)
+    # todo make constant
+    X = np.array(sum(X, [])).reshape(1, -1)
+    with open('/Users/manas/projects/code/carrybackend/app/core/model.pkl', 'rb') as f:
+        model = pickle.load(f)
+    res = model.predict_proba(X)[0]
+    print(res)
     print("gameId:", curr_match["gameId"])
     print("Team 1:", team1_members)
     print("VS")
     print("Team 2:", team2_members)
-    print("Team 1 Win Percentage:", 1-res)
-    print("Team 2 Win Percentage:", res)
-    if res < .5:
-        compare_teams.store_prediction_in_db(curr_match["gameId"], 0, curr_match["gameStartTime"],
-                                             str(list(participant_id_mapping.keys())), "Team 1", "Pending", 1-res)
+    print("Team 1 Win Percentage:", res[0])
+    print("Team 2 Win Percentage:", res[1])
+    if res[1] < .5:
+        compare_teams.store_prediction_in_db(str(curr_match["gameId"]), 0, curr_match["gameStartTime"],
+                                             str(list(participant_id_mapping.keys())), "Team 1", "Pending", str(res[0]))
     else:
-        compare_teams.store_prediction_in_db(curr_match["gameId"], 0, curr_match["gameStartTime"],
-                                             str(list(participant_id_mapping.keys())), "Team 2", "Pending", res)
+        compare_teams.store_prediction_in_db(str(curr_match["gameId"]), 0, curr_match["gameStartTime"],
+                                             str(list(participant_id_mapping.keys())), "Team 2", "Pending", str(res[1]))
     # remove finished prediction from files
     remove_live(curr_match["gameId"])
     return res
