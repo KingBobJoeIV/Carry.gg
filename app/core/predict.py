@@ -74,8 +74,6 @@ def predict(ign, app):
     for p in participants:
         p = p["summonerId"]
         participant_id_mapping[p] = get_account_info.get_puuid_from_id(p)
-    team1_members = []
-    team2_members = []
     team1_roles = {}
     team2_roles = {}
     counter = 0
@@ -98,7 +96,7 @@ def predict(ign, app):
     # vector containing prediction data p1, p2, ..., p10
     X = [None for _ in range(10)]
     role_mat_map = {"TOP": 0, "JUNGLE": 1, "MIDDLE": 2, "BOTTOM": 3, "UTILITY": 4}
-    print(participant_id_mapping.values())
+    # print(participant_id_mapping.values())
     # figure out last revisionDate for all players
     times = [None for _ in range(10)]
     count = 0
@@ -172,14 +170,11 @@ def predict(ign, app):
     # make the prediction
     # todo make constant
     X = np.array(sum(X, [])).reshape(1, -1)
-    with open('/Users/manas/projects/code/carrybackend/app/core/model.pkl', 'rb') as f:
+    with open('app/core/model.pkl', 'rb') as f:
         model = pickle.load(f)
     res = model.predict_proba(X)[0]
     print(res)
     print("gameId:", curr_match["gameId"])
-    print("Team 1:", team1_members)
-    print("VS")
-    print("Team 2:", team2_members)
     print("Team 1 Win Percentage:", res[0])
     print("Team 2 Win Percentage:", res[1])
     if res[1] < .5:

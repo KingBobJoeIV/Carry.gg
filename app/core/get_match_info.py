@@ -112,7 +112,7 @@ def store_blobs_in_db(matchlist, blobs, puuid):
 # generate matchid, blob for given player
 def process_match(match, puuid):
     matchid = match
-    print("trying to process:", matchid, "started at:", str(datetime.datetime.fromtimestamp(time.time())))
+    # print("trying to process:", matchid, "started at:", str(datetime.datetime.fromtimestamp(time.time())))
     match = get_match_by_id(matchid)
     puuids = match["metadata"]["participants"]
     ind = puuids.index(puuid)
@@ -121,7 +121,7 @@ def process_match(match, puuid):
     if match["info"]["gameDuration"] <= 240:
         print(matchid, "was a remake")
         return {champ_role: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0]}
-    print("processed:", matchid, "at:", str(datetime.datetime.fromtimestamp(time.time())))
+    # print("processed:", matchid, "at:", str(datetime.datetime.fromtimestamp(time.time())))
     return calculate_weights.create_blob_entry(champ_role, participants[ind], match["info"]["teams"][ind // 5])
 
 
