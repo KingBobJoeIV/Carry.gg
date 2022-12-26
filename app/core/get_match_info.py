@@ -121,6 +121,9 @@ def process_match(match, puuid):
     if match["info"]["gameDuration"] <= 240:
         print(matchid, "was a remake")
         return {champ_role: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0]}
+    elif "challenges" not in participants[ind]:
+        print("no challenges for:", matchid)
+        return {champ_role: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0]}
     # print("processed:", matchid, "at:", str(datetime.datetime.fromtimestamp(time.time())))
     return calculate_weights.create_blob_entry(champ_role, participants[ind], match["info"]["teams"][ind // 5])
 
