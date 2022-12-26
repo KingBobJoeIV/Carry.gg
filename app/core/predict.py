@@ -1,6 +1,7 @@
 import concurrent.futures
 import pickle
 from multiprocessing import Process, Queue
+from threading import Thread
 import numpy as np
 from . import constants
 from . import get_account_info
@@ -127,7 +128,7 @@ def predict(ign, app):
     to_store = []
     # execute 10 threads
     q = Queue()
-    p = [Process(target=get_match_info.process_by_thread, args=(split, q)) for split in splits]
+    p = [Thread(target=get_match_info.process_by_thread, args=(split, q)) for split in splits]
     for t in p:
         t.start()
     for t in p:

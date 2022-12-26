@@ -1,11 +1,12 @@
 import datetime
-import threading
-from multiprocessing import Queue, Process
+from threading import Thread
+from multiprocessing import Queue
 
 from . import constants, get_match_info
 from .watcher import lol_watcher
 from app.db import db
 from app.db.schemas import PlayerInfo
+from sqlalchemy.orm.attributes import flag_modified
 # from get_match_info import store_match_in_db, get_all_matches
 import json
 from pathlib import Path
@@ -58,7 +59,7 @@ def get_all_mastery(summonerId):
 
 def store_player_in_db(puuid):
     curr = get_info(puuid)
-    print("main player storing:", curr["name"], "started at", str(datetime.datetime.fromtimestamp(time.time())))
+    print("storing:", curr["name"], "started at", str(datetime.datetime.fromtimestamp(time.time())))
     # replace revisionDate with current time
     curr["revisionDate"] = math.floor(time.time() * 1000)
     # check to see if account is already stored in db
@@ -72,47 +73,34 @@ def store_player_in_db(puuid):
         row = PlayerInfo(curr, mastery, league, {}, {})
         db.session.add(row)
         db.session.commit()
-        all_matches = get_match_info.get_matches_for_pred([puuid], [constants.SZN_START])
-        if all_matches[1] != 0:
-            # divide matches evenly across 10 threads
-            splits = get_match_info.split_into_threads(all_matches[0], all_matches[1], constants.NUM_THREADS)
-            to_store = []
-            # execute 10 threads
-            q = Queue()
-            p = [Process(target=get_match_info.process_by_thread, args=(split, q)) for split in splits]
-            for t in p:
-                t.start()
-            for t in p:
-                to_store.append(q.get())
-            for t in p:
-                t.join()
-            # put results of threads into 1 dict
-            final = get_match_info.join_threads(to_store)
-            # store results in db
-            get_match_info.store_blobs_in_db(final[puuid][0], final[puuid][1], puuid)
+        print("new row created for:", curr["name"], "finished at:", str(datetime.datetime.fromtimestamp(time.time())))
     # if it has been at least 2 minutes since last update, update info
     elif curr["revisionDate"] - info.revisionDate > 120000:
-        # all matches the player has played since last revision date or szn start
-        all_matches = get_match_info.get_matches_for_pred([puuid], [info.revisionDate//1000])
-        if all_matches[1] != 0:
-            # divide matches evenly across 10 threads
-            splits = get_match_info.split_into_threads(all_matches[0], all_matches[1], constants.NUM_THREADS)
-            to_store = []
-            # execute 10 threads
-            q = Queue()
-            p = [Process(target=get_match_info.process_by_thread, args=(split, q)) for split in splits]
-            for t in p:
-                t.start()
-            for t in p:
-                to_store.append(q.get())
-            for t in p:
-                t.join()
-            # put results of threads into 1 dict
-            final = get_match_info.join_threads(to_store)
-            # store results in db
-            get_match_info.store_blobs_in_db(final[puuid][0], final[puuid][1], puuid)
-    db.session.commit()
-    print("Updated:", curr["name"], "finished at:", str(datetime.datetime.fromtimestamp(time.time())))
+        mastery = get_all_mastery(curr["id"])[0]
+        league = get_rank_info(curr["id"])
+        if league:
+            setattr(info, "tier", league["tier"])
+            setattr(info, "rank", league["rank"])
+            setattr(info, "leaguePoints", league["leaguePoints"])
+            setattr(info, "wins", league["wins"])
+            setattr(info, "losses", league["losses"])
+            flag_modified(info, "tier")
+            flag_modified(info, "rank")
+            flag_modified(info, "leaguePoints")
+            flag_modified(info, "wins")
+            flag_modified(info, "losses")
+        setattr(info, "championId", mastery["championId"])
+        setattr(info, "championPoints", mastery["championPoints"])
+        setattr(info, "championLevel", mastery["championLevel"])
+        setattr(info, "revisionDate", curr["revisionDate"])
+        flag_modified(info, "championId")
+        flag_modified(info, "championPoints")
+        flag_modified(info, "championLevel")
+        flag_modified(info, "revisionDate")
+        db.session.commit()
+        print("Updated:", curr["name"], "finished at:", str(datetime.datetime.fromtimestamp(time.time())))
+    else:
+        print("too soon to update", curr["name"])
     return (info or row).as_json
 
 

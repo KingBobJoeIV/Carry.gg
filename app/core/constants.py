@@ -1,7 +1,7 @@
 
 REGION = "AMERICAS"
 MY_REGION = "NA1"
-SZN_START = 1668623400
+SZN_START = 1668709799
 
 # Normalization constants(unused)
 MAX_KILLS = 30
