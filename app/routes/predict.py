@@ -82,6 +82,8 @@ def profile_page(ign):
         game_info = p.gameDuration
         if game_info == 0:
             game_info = ["In Progress", ""]
+        else:
+            game_info = calculate_game_time(p.gameStartTimestamp, p.gameDuration)
         players = p.ids.strip('][').split(',')
         count = 0
         team1 = []
