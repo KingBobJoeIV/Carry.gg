@@ -6,5 +6,8 @@
 </head>
 <body>
 {{ status }}
+{% for data in snapshot %}
+    <p>{{ data }}</p>
+{% endfor %}
 </body>
 </html>

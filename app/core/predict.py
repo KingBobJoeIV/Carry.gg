@@ -123,24 +123,27 @@ def predict(ign, app):
     # get all matches
     print(times)
     all_matches = get_match_info.get_matches_for_pred(list(participant_id_mapping.values()), times)
-    # divide matches evenly across 10 threads
-    splits = get_match_info.split_into_threads(all_matches[0], all_matches[1], constants.NUM_THREADS)
-    to_store = []
-    # execute 10 threads
-    q = Queue()
-    p = [Thread(target=get_match_info.process_by_thread, args=(split, q)) for split in splits]
-    for t in p:
-        t.start()
-    for t in p:
-        to_store.append(q.get())
-    for t in p:
-        t.join()
-    # put results of threads into 1 dict
-    final = get_match_info.join_threads(to_store)
-    # store results in db
-    print("All players' info updated in db at:" + str(datetime.datetime.fromtimestamp(time.time())))
-    for k in final.keys():
-        get_match_info.store_blobs_in_db(final[k][0], final[k][1], k)
+    if all_matches[1] != 0:
+        # divide matches evenly across 10 threads
+        splits = get_match_info.split_into_threads(all_matches[0], all_matches[1], constants.NUM_THREADS)
+        to_store = []
+        # execute 10 threads
+        q = Queue()
+        p = [Thread(target=get_match_info.process_by_thread, args=(split, q)) for split in splits]
+        for t in p:
+            t.start()
+        for t in p:
+            to_store.append(q.get())
+        for t in p:
+            t.join()
+        # put results of threads into 1 dict
+        final = get_match_info.join_threads(to_store)
+        # store results in db
+        for k in final.keys():
+            get_match_info.store_blobs_in_db(final[k][0], final[k][1], k)
+        print("All players' info updated in db at:" + str(datetime.datetime.fromtimestamp(time.time())))
+    # player stats at time of game
+    snapshot = []
     for participant in participant_id_mapping.values():
         if counter < 5:
             current_participant_champ = team1_roles[get_key(participant_id_mapping, participant)]
@@ -166,6 +169,7 @@ def predict(ign, app):
             except:
                 X[role_mat_map[role] + 5] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         counter += 1
+        snapshot.append(get_account_info.get_current_champ_info(participant, champ_role))
         # fetch time of one participant
         print(curr_player_info.name + "'s games fetched at: " + str(datetime.datetime.fromtimestamp(time.time())))
     # make the prediction
@@ -178,12 +182,16 @@ def predict(ign, app):
     print("gameId:", curr_match["gameId"])
     print("Team 1 Win Percentage:", res[0])
     print("Team 2 Win Percentage:", res[1])
+    print(snapshot)
+    snapshot = str(snapshot)
     if res[1] < .5:
         compare_teams.store_prediction_in_db(str(curr_match["gameId"]), 0, curr_match["gameStartTime"],
-                                             str(list(participant_id_mapping.keys())), "Team 1", "Pending", str(res[0]))
+                                             str(list(participant_id_mapping.keys())), "Team 1", "Pending", str(res[0]),
+                                             snapshot)
     else:
         compare_teams.store_prediction_in_db(str(curr_match["gameId"]), 0, curr_match["gameStartTime"],
-                                             str(list(participant_id_mapping.keys())), "Team 2", "Pending", str(res[1]))
+                                             str(list(participant_id_mapping.keys())), "Team 2", "Pending", str(res[1]),
+                                             snapshot)
     # remove finished prediction from files
     remove_live(curr_match["gameId"])
     return res

@@ -101,6 +101,14 @@ def store_player_in_db(puuid):
     return (info or row).as_json
 
 
+def get_current_champ_info(puuid, champ_role):
+    try:
+        return str(PlayerInfo.query.filter_by(puuid=puuid).first().blob[champ_role])
+    except:
+        # todo use constant(12)
+        return "[[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0]"
+
+
 def determine_level_image(level):
     if 30 <= level < 50:
         return 30

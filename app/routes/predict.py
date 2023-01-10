@@ -185,13 +185,15 @@ def live_game(ign):
     # todo eye candy stuff based on above values
     team_1 = match["participants"][:4]
     team_2 = match["participants"][5:]
-    return render_template("liveGame.html", team_1=team_1, team_2=team_2, gameid=gameid, status=pending, ign=ign)
+    snapshot = PredictInfo.query.filter(PredictInfo.match_id == str(gameid)).first().currentStats
+    return render_template("liveGame.html", team_1=team_1, team_2=team_2, gameid=gameid, status=pending, ign=ign,
+                           snapshot=snapshot)
 
 
 @router.get("/game/<gameid>")
 def past_game(gameid):
     try:
-        # todo needs to be a prediction in db (add custom url for prediction not done on past game)
+        # todo needs to be a prediction in db (add custom template for prediction not done on past game)
         match = get_match_by_id("NA1_" + gameid)
         data = match["info"]
         if data["queueId"] != 420:

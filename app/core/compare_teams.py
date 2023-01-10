@@ -4,8 +4,8 @@ from app.db import db
 from app.db.schemas import PredictInfo
 
 
-def store_prediction_in_db(match_id, duration, start, ids, prediction, actual, chance):
-    row = PredictInfo(match_id, duration, start, ids, prediction, actual, chance)
+def store_prediction_in_db(match_id, duration, start, ids, prediction, actual, chance, snapshot):
+    row = PredictInfo(match_id, duration, start, ids, prediction, actual, chance, snapshot)
     db.session.add(row)
     db.session.commit()
     print("stored prediction:", match_id)

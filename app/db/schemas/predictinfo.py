@@ -11,8 +11,9 @@ class PredictInfo(db.Model):
     predictedWinner: str = db.Column(db.TEXT)
     actualWinner: str = db.Column(db.TEXT)
     predictedChance: float = db.Column(db.Float)
+    currentStats: str = db.Column(db.TEXT)
 
-    def __init__(self, match_id, duration, start, ids, predict, actual, chance):
+    def __init__(self, match_id, duration, start, ids, predict, actual, chance, snapshot):
         self.match_id = match_id
         self.gameDuration = duration
         self.gameStartTimestamp = start
@@ -20,6 +21,7 @@ class PredictInfo(db.Model):
         self.predictedWinner = predict
         self.actualWinner = actual
         self.predictedChance = chance
+        self.currentStats = snapshot
 
     @property
     def as_json(self):
