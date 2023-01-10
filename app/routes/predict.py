@@ -1,8 +1,9 @@
+import requests
 from flask import Blueprint, render_template, request, current_app, stream_with_context
 from app.decorators.api_response import api
 from app.core.predict import predict, get_account_info, make_path
 from app.core.update import update
-from app.core.get_account_info import get_all_mastery, get_rank_info, determine_level_image
+from app.core.get_account_info import get_all_mastery, get_rank_info, determine_level_image, get_info_by_ign
 from app.core.get_match_info import check_if_in_game, calculate_game_time, get_live_match, get_match_by_id
 from app.imageinfo import imageinfo
 from app.db import db
@@ -63,26 +64,22 @@ def profile_page(ign):
     if update_info == "toolow":
         return render_template("unranked.html", ign=ign)
     elif update_info == "notfound":
-        return render_template("pageNotFound.html", ign=ign)
+        return render_template("pageNotFound.html")
     elif update_info == "servererror":
         return render_template("500.html")
     hide = False
     pending = ""
-    thread = False
-    # predict live game on diff thread
-    if request.args.get("_in_game"):
-        thread = True
-        predict_live(ign)
-        # todo open the live game page
     prof = get_account_info.get_info_by_ign(ign)
     # past/live predictions
     predictions = PredictInfo.query.filter(PredictInfo.ids.contains(prof["id"])).all()
     pred = []
     # todo game
     for p in predictions:
+        live = False
         game_info = p.gameDuration
         if game_info == 0:
             game_info = ["In Progress", ""]
+            live = True
         else:
             game_info = []
             temp = calculate_game_time(p.gameStartTimestamp, p.gameDuration)
@@ -106,18 +103,15 @@ def profile_page(ign):
                 color = "#7d7d7dcc"
             elif p.predictedWinner == p.actualWinner:
                 color = "#07963e99"
-        if game_info == 0:
+        if live:
             pred.append((float("-inf"), [game_info, team1, team2, p.predictedWinner, p.actualWinner,
-                                  str(round(p.predictedChance * 100, 2)) + "%", color]))
+                                  str(round(p.predictedChance * 100, 2)) + "%", color, live]))
         else:
             pred.append((-int(p.gameStartTimestamp), [game_info, team1, team2, p.predictedWinner, p.actualWinner,
-                                        str(round(p.predictedChance * 100, 2)) + "%", color]))
+                                        str(round(p.predictedChance * 100, 2)) + "%", color, live]))
     pred.sort(key=lambda x: x[0])
     for i in range(len(pred)):
         pred[i] = pred[i][1]
-    # give enough time for the pending prediction thread to put game in cache
-    if thread:
-        sleep(2)
     # not in game
     if not check_if_in_game(prof["id"]):
         hide = True
@@ -131,12 +125,13 @@ def profile_page(ign):
         if file.is_file():
             print("calculating")
             pending = "calculating"
-            hide = True
         # check if prediction is pending(ingame)
         elif in_db is not None and in_db.actualWinner == "Pending":
             print("waiting")
-            hide = True
             pending = "waiting"
+        else:
+            pending = "predict"
+            print("prediction not started")
     mastery = get_all_mastery(prof["id"])[0]
     skin = imageinfo.randomize_skins_by_champ(app.core.constants.CHAMPION_MAPPING[mastery["championId"]])
     league = get_rank_info(prof["id"])
@@ -159,31 +154,52 @@ def prof_page(ign):
     return stream_with_context(profile_page(ign))
 
 
-@router.get("/profile/<ign>?_in_game=1")
-def redirect_to_prof(ign):
-    return stream_with_context(profile_page(ign))
+@router.get("/profile/<ign>/live")
+def live_game(ign):
+    try:
+        id = get_info_by_ign(ign)["id"]
+    except:
+        return render_template("pageNotFound.html")
+    # not ingame
+    if not check_if_in_game(id):
+        return render_template("notInGame.html", ign=ign)
+    # in game
+    else:
+        match = get_live_match(id)
+        gameid = match["gameId"]
+        print(match)
+        in_db = PredictInfo.query.filter(PredictInfo.match_id == str(gameid)).first()
+        # check if prediction is pending(calculation)
+        file = make_path(gameid)
+        if file.is_file():
+            print("calculating")
+            pending = "calculating"
+        # check if prediction is pending(ingame)
+        elif in_db is not None and in_db.actualWinner == "Pending":
+            print("waiting")
+            pending = "waiting"
+        else:
+            pending = "calculating"
+            print("new predict just started calculating")
+            predict_live(ign)
+    # todo eye candy stuff based on above values
+    team_1 = match["participants"][:4]
+    team_2 = match["participants"][5:]
+    return render_template("liveGame.html", team_1=team_1, team_2=team_2, gameid=gameid, status=pending, ign=ign)
 
 
 @router.get("/game/<gameid>")
-def live_game(gameid):
-    # show live stuff if live, else show post match info (use api call)
-    print(gameid)
+def past_game(gameid):
     try:
-        print("heere")
-        match = get_live_match(app.core.constants.MY_REGION + gameid)
+        # todo needs to be a prediction in db (add custom url for prediction not done on past game)
+        match = get_match_by_id("NA1_" + gameid)
         data = match["info"]
+        if data["queueId"] != 420:
+            raise Exception
         team_1 = data["participants"][:4]
         team_2 = data["participants"][5:]
-        return render_template("game.html", team_1=team_1, team_2=team_2, gameid=gameid, live=True)
+        return render_template("pastGame.html", team_1=team_1, team_2=team_2, gameid=gameid)
     except:
-        print('here')
-        match = get_match_by_id(gameid)
-        data = match["info"]
-        team_1 = data["participants"][:4]
-        team_2 = data["participants"][5:]
-        return render_template("game.html", team_1=team_1, team_2=team_2, gameid=gameid, live=False)
-    finally:
-        print("here")
         return render_template("pageNotFound.html")
 
 

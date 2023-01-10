@@ -53,6 +53,7 @@ def get_matches(puuid, startTime, start=0, count=100):
 
 
 def get_match_by_id(matchid):
+    # todo handle errors
     return lol_watcher.match.by_id(constants.REGION, matchid)
 
 
