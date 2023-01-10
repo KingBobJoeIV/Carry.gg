@@ -1,0 +1,58 @@
+h1 {
+    color: darkgoldenrod;
+    font-size: x-large;
+}
+p {
+    color: darkgoldenrod;
+}
+
+.center {
+    text-align: center;
+}
+body {
+    background-image: url("https://github.com/InFinity54/LoL_DDragon/blob/master/extras/wallpapers/wallpaper04.png?raw=true");
+    background-size: 100%;
+}
+.main {
+    text-align: center;
+    margin-left: 15%; /* Same as the width of the sidebar */
+    color: darkgoldenrod;
+}
+a {
+    color: darkgoldenrod;
+}
+
+a:visited {
+    color: darkgoldenrod;
+}
+
+a:hover {
+    color: darkgoldenrod;
+}
+
+a:active {
+    color: darkgoldenrod;
+}
+
+.game_info {
+    display: flex;
+    /*width: 50%;*/
+    /*height: 10vw;*/
+    flex-grow: 1;
+    justify-content: center;
+    border: 5px solid black;
+    border-radius: 10px;
+}
+
+.game_team_1_info {
+    flex-grow: 1;
+}
+
+.game_team_2_info {
+    flex-grow: 1;
+}
+
+.player_info {
+    ...
+}
+

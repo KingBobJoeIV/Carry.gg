@@ -37,13 +37,16 @@
         <p id="hid" hidden="hidden">{{ hidden }}</p>
         {% if not hide %}
             <form action="/predict/profile/{{ ign }}">
+{#            todo redirect on click#}
             <input type="hidden" name="_in_game"  value="1"/>
                 <button id="predictBtn" type="submit">Predict Live Game!</button>
             </form>
+{#            todo keep button with diff text#}
         {% elif pending == "calculating" %}
             <h1 id="igbanner">Calculating prediction, come back later!</h1>
         {% elif pending == "waiting" %}
             <h1 id="igbanner">Waiting for game result!</h1>
+{#            keep the same#}
         {% else %}
             <h1 id="igbanner">{{ ign }} is not in game!</h1>
         {% endif %}
@@ -57,7 +60,7 @@
                 {% for row in pred %}
                     <li class="game_container" style="background-color: {{ row[6] }}">
                         <div class="game_metadata">
-                            <p> Game Info</p>
+                            <p> <a href="/predict/game/{{ row[0][2] }}" target="_blank">Game Info</a></p>
                             <p>{{ row[0][0] }}</p>
                             <p>{{ row[0][1] }}</p>
                         </div>

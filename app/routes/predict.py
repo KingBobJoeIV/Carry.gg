@@ -3,7 +3,7 @@ from app.decorators.api_response import api
 from app.core.predict import predict, get_account_info, make_path
 from app.core.update import update
 from app.core.get_account_info import get_all_mastery, get_rank_info, determine_level_image
-from app.core.get_match_info import check_if_in_game, calculate_game_time, get_live_match
+from app.core.get_match_info import check_if_in_game, calculate_game_time, get_live_match, get_match_by_id
 from app.imageinfo import imageinfo
 from app.db import db
 from app.db.schemas import PredictInfo, PlayerInfo
@@ -73,6 +73,7 @@ def profile_page(ign):
     if request.args.get("_in_game"):
         thread = True
         predict_live(ign)
+        # todo open the live game page
     prof = get_account_info.get_info_by_ign(ign)
     # past/live predictions
     predictions = PredictInfo.query.filter(PredictInfo.ids.contains(prof["id"])).all()
@@ -83,7 +84,12 @@ def profile_page(ign):
         if game_info == 0:
             game_info = ["In Progress", ""]
         else:
-            game_info = calculate_game_time(p.gameStartTimestamp, p.gameDuration)
+            game_info = []
+            temp = calculate_game_time(p.gameStartTimestamp, p.gameDuration)
+            game_info.append(temp[0])
+            game_info.append(temp[1])
+            game_info.append(p.match_id)
+            print(game_info)
         players = p.ids.strip('][').split(',')
         count = 0
         team1 = []
@@ -156,6 +162,35 @@ def prof_page(ign):
 @router.get("/profile/<ign>?_in_game=1")
 def redirect_to_prof(ign):
     return stream_with_context(profile_page(ign))
+
+
+@router.get("/game/<gameid>")
+def live_game(gameid):
+    # show live stuff if live, else show post match info (use api call)
+    print(gameid)
+    try:
+        print("heere")
+        match = get_live_match(app.core.constants.MY_REGION + gameid)
+        data = match["info"]
+        team_1 = data["participants"][:4]
+        team_2 = data["participants"][5:]
+        return render_template("game.html", team_1=team_1, team_2=team_2, gameid=gameid, live=True)
+    except:
+        print('here')
+        match = get_match_by_id(gameid)
+        data = match["info"]
+        team_1 = data["participants"][:4]
+        team_2 = data["participants"][5:]
+        return render_template("game.html", team_1=team_1, team_2=team_2, gameid=gameid, live=False)
+    finally:
+        print("here")
+        return render_template("pageNotFound.html")
+
+
+# todo
+# @router.get("/")
+# def redirect_to_home():
+#     return stream_with_context(home_page)
 
 
 def check_pending():

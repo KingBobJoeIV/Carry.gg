@@ -1,7 +1,4 @@
 import datetime
-from threading import Thread
-from multiprocessing import Queue
-
 from . import constants, get_match_info
 from .watcher import lol_watcher
 from app.db import db

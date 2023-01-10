@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="/static/liveStyles.css" />
+    <meta charset="UTF-8">
+    <title>{{ gameid }}</title>
+</head>
+<div class="main">
+    {% if not live %}
+        <div class="game_info">
+            <div class="team_1">
+                {%  for player in team_1 %}
+                    <div class="player_info">
+                        <p>{{ player["kills"] }}/{{ player["deaths"] }}/{{ player["assists"] }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="team_2">
+                {%  for player in team_2 %}
+                    <div class="player_info">
+                        <p>{{ player["kills"] }}/{{ player["deaths"] }}/{{ player["assists"] }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+</html>

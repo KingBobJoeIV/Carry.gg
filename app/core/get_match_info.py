@@ -180,35 +180,6 @@ def join_threads(all_res):
     return final
 
 
-# outdated
-# def get_stored_by_champ_role(participant, champ_role):
-#     role = champ_role.split(",")[1]
-#     print("Role:", role)
-#     if role == " TOP":
-#         return BetterGame.query.filter(or_(BetterGame.participantOne == participant, BetterGame.participantOneChamp == champ_role),
-#                                        or_(BetterGame.participantSix == participant, BetterGame.participantSixChamp == champ_role)).all()
-#     elif role == " JUNGLE":
-#         return BetterGame.query.filter(or_(BetterGame.participantTwo == participant, BetterGame.participantTwoChamp == champ_role),
-#                                        or_(BetterGame.participantSeven == participant, BetterGame.participantSevenChamp == champ_role)).all()
-#     elif role == " MID":
-#         return BetterGame.query.filter(or_(BetterGame.participantThree == participant, BetterGame.participantThreeChamp == champ_role),
-#                                        or_(BetterGame.participantEight == participant, BetterGame.participantEightChamp == champ_role)).all()
-#     elif role == " BOTTOM":
-#         return BetterGame.query.filter(or_(BetterGame.participantFour == participant, BetterGame.participantFourChamp == champ_role),
-#                                        or_(BetterGame.participantNine == participant, BetterGame.participantNineChamp == champ_role)).all()
-#     elif role == " UTILITY":
-#         return BetterGame.query.filter(or_(BetterGame.participantFive == participant, BetterGame.participantFiveChamp == champ_role),
-#                                        or_(BetterGame.participantTen == participant, BetterGame.participantTenChamp == champ_role)).all()
-
-# outdated
-# def update_matches(matchlist):
-#     for match in matchlist:
-#         info = BetterGame.query.filter_by(match_id=str(match)).first()
-#         # if match is not in db
-#         if not info:
-#             store_match_in_db(get_match_by_id(match))
-
-
 def check_if_in_game(id):
     try:
         game = lol_watcher.spectator.by_summoner(constants.MY_REGION, id)

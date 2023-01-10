@@ -3,9 +3,6 @@ from . import get_account_info, get_match_info, compare_teams
 from app.db import db
 from app.db.schemas import PredictInfo
 from app.core.predict import remove_live, make_path
-import time
-import os
-from pathlib import Path
 
 
 def update(ign):
@@ -48,13 +45,3 @@ def update(ign):
                 continue
             continue
     return "ok"
-
-
-# todo problem with name changes DON'T USE!
-# for internal use only
-# this also updates the predict table
-# def update_account_table():
-#     rows = db.session.query(AccountInfo)
-#     for row in rows:
-#         update(row.name)
-#     print("all accounts updated!")
