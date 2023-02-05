@@ -16,30 +16,6 @@ from pathlib import Path
 from app.imageinfo.imageinfo import skin_info
 router = Blueprint("predict", __name__, url_prefix="/predict")
 
-# not in use
-# @router.get("/<ign>")
-# @api.none
-# def predict_route(ign):
-#     return predict(ign)
-
-# not in use
-# @router.get("/update/<ign>")
-# @api.none
-# def update_route(ign):
-#     return update(ign)
-
-# not in use
-# @router.get("/account-info/<ign>")
-# @api.none
-# def get_acc_info(ign):
-#     return get_account_info.store_account_in_db(get_account_info.get_info_by_ign(ign)["puuid"])
-
-# problem with name changes don't use!
-# @router.get("update-all")
-# @api.none
-# def update_all_accounts():
-#     return update_account_table()
-
 
 @router.get("/home/riot.txt")
 def riot_verify():
@@ -178,6 +154,7 @@ def live_game(ign):
         elif in_db is not None and in_db.actualWinner == "Pending":
             print("waiting")
             pending = "waiting"
+            snapshot = PredictInfo.query.filter(PredictInfo.match_id == str(gameid)).first().currentStats
         else:
             pending = "calculating"
             print("new predict just started calculating")
@@ -185,7 +162,6 @@ def live_game(ign):
     # todo eye candy stuff based on above values
     team_1 = match["participants"][:4]
     team_2 = match["participants"][5:]
-    snapshot = PredictInfo.query.filter(PredictInfo.match_id == str(gameid)).first().currentStats
     return render_template("liveGame.html", team_1=team_1, team_2=team_2, gameid=gameid, status=pending, ign=ign,
                            snapshot=snapshot)
 
