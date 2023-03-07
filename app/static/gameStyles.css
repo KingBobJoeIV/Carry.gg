@@ -62,7 +62,7 @@ a:active {
 
 .player_info {
     display: flex;
-    flex-direction: row;
+    /*flex-direction: row;*/
     padding: 5px;
 }
 

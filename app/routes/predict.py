@@ -183,9 +183,8 @@ def past_game(gameid):
         expected = format_expected(PredictInfo.query.filter(PredictInfo.match_id == str(gameid)).first().currentStats)
         expected = [format_expected(x) for x in expected]
         actual = process_actual(match)
-        diff = [np.array(expected[i][0])-np.array(actual[i]) for i in range(10)]
-        print(expected[0])
-        print(actual)
+        diff = [np.array(actual[i]-np.array(expected[i][0])) for i in range(10)]
+        print(len(diff[1]))
         return render_template("pastGame.html", team_1=team_1, team_2=team_2, gameid=gameid, expected=expected,
                                duration=data["gameDuration"]/60, actual=actual, diff=diff)
     except:
