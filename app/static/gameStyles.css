@@ -15,7 +15,6 @@ body {
 }
 .main {
     text-align: center;
-    margin-left: 15%; /* Same as the width of the sidebar */
     color: darkgoldenrod;
 }
 a {
@@ -35,24 +34,72 @@ a:active {
 }
 
 .game_info {
-    display: flex;
-    /*width: 50%;*/
-    /*height: 10vw;*/
-    flex-grow: 1;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: auto auto;
+    /*flex-grow: 1;*/
+    /*flex-direction: column;*/
+    justify-content: left;
     border: 5px solid black;
     border-radius: 10px;
 }
 
-.game_team_1_info {
+.team_container {
+    display: flex;
+    flex-direction: column;
     flex-grow: 1;
+    border: 5px solid red;
+    border-radius: 10px;
 }
 
-.game_team_2_info {
-    flex-grow: 1;
+.team {
+    display: inline-grid;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 5px solid blue;
+    border-radius: 10px;
 }
 
 .player_info {
-    ...
+    display: flex;
+    flex-direction: row;
+    padding: 5px;
 }
 
+.player_ign_area {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    border-color: blue;
+    padding: 5px;
+}
+
+.zero_text {
+    padding: 0;
+    margin: 0;
+}
+
+.team_expected_container {
+    display: flex;
+    flex-grow: 4;
+    flex-direction: column;
+    border-color: magenta;
+    padding: 5px;
+}
+
+.team_expected {
+    display: flex;
+    flex-direction: column;
+    border: 5px solid green;
+    border-radius: 10px;
+}
+
+.one_player_stats {
+    display: flex;
+    flex-direction: row;
+}
+
+.act_exp_diff {
+    display: flex;
+    flex-direction: column;
+}

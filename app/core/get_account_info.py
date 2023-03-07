@@ -15,7 +15,7 @@ import math
 # todo needs to be updated every patch
 # @cache
 def map_id_to_champ():
-    p=Path("./app/ddragon_12_23_1_champ_data.json").resolve()
+    p=Path("./app/ddragon_13_4_1_champ_data.json").resolve()
     print(p)
     f = open(p)
     data = json.load(f)
@@ -58,7 +58,7 @@ def store_player_in_db(puuid):
     curr = get_info(puuid)
     print("storing:", curr["name"], "started at", str(datetime.datetime.fromtimestamp(time.time())))
     # replace revisionDate with current time
-    curr["revisionDate"] = math.floor(time.time() * 1000)
+    curr["revisionDate"] = math.floor(time.time())
     # check to see if account is already stored in db
     info = PlayerInfo.query.filter_by(puuid=puuid).first()
     # create a new row for the account
@@ -72,7 +72,7 @@ def store_player_in_db(puuid):
         db.session.commit()
         print("new row created for:", curr["name"], "finished at:", str(datetime.datetime.fromtimestamp(time.time())))
     # if it has been at least 2 minutes since last update, update info
-    elif curr["revisionDate"] - info.revisionDate > 120000:
+    elif curr["revisionDate"] - info.revisionDate > 120:
         mastery = get_all_mastery(curr["id"])[0]
         league = get_rank_info(curr["id"])
         if league:

@@ -1,4 +1,6 @@
+import ast
 import datetime
+import json
 import math
 import time
 
@@ -231,3 +233,11 @@ def time_since_game(seconds):
         if minutes == 1:
             return "1 minute ago"
         return str(int(minutes)) + " minutes ago"
+
+
+def format_expected(expected):
+    return ast.literal_eval(expected)
+
+
+def process_actual(match):
+    return [calculate_weights.transform_data(match["info"]["participants"][i], match["info"]["teams"][i // 5]) for i in range(10)]

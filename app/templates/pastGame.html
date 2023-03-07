@@ -1,26 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="/static/liveStyles.css" />
+    <link rel="stylesheet" href="/static/gameStyles.css" />
     <meta charset="UTF-8">
     <title>{{ gameid }}</title>
 </head>
 <div class="main">
     {% if not live %}
         <div class="game_info">
-            <div class="team_1">
-                {%  for player in team_1 %}
-                    <div class="player_info">
-                        <p>{{ player["kills"] }}/{{ player["deaths"] }}/{{ player["assists"] }}</p>
-                    </div>
-                {% endfor %}
+            <div class="team_container">
+                <div class="team">
+                    {%  for player in team_1 %}
+                        <div class="player_info">
+                            <img src="https://github.com/InFinity54/LoL_DDragon/blob/master/img/champion/tiles/{{ player["championName"] }}_0.jpg?raw=true" width="10%" height="10%">
+                            <div class="player_ign_area">
+                                <p class="zero_text">{{ player["summonerName"] }}</p>
+                                <p class="zero_text">KDA: {{ player["kills"] }}/{{ player["deaths"] }}/{{ player["assists"] }} ({{ "%.2f"|format(player["challenges"]["kda"]) }}:1)</p>
+                                {% set cs = player["totalMinionsKilled"] + player["neutralMinionsKilled"]%}
+                                {% set cs_min = cs/duration %}
+                                <p class="zero_text">CS: {{ cs }} ({{ "%.1f"|format(cs_min) }}/m)</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="team">
+                    {%  for player in team_2 %}
+                        <div class="player_info">
+                            <img src="https://github.com/InFinity54/LoL_DDragon/blob/master/img/champion/tiles/{{ player["championName"] }}_0.jpg?raw=true" width="10%" height="10%">
+                            <div class="player_ign_area">
+                                <p class="zero_text">{{ player["summonerName"] }}</p>
+                                <p class="zero_text">KDA: {{ player["kills"] }}/{{ player["deaths"] }}/{{ player["assists"] }} ({{ "%.2f"|format(player["challenges"]["kda"]) }}:1)</p>
+                                {% set cs = player["totalMinionsKilled"] + player["neutralMinionsKilled"]%}
+                                {% set cs_min = cs/duration %}
+                                <p class="zero_text">CS: {{ cs }} ({{ "%.1f"|format(cs_min) }}/m)</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
-            <div class="team_2">
-                {%  for player in team_2 %}
-                    <div class="player_info">
-                        <p>{{ player["kills"] }}/{{ player["deaths"] }}/{{ player["assists"] }}</p>
-                    </div>
-                {% endfor %}
+            <div class="team_expected_container">
+                <div class="team_expected">
+                    {%  for i in range(5) %}
+                        <div class="one_player_stats">
+                            {% for j in range(12) %}
+                                <div class="act_exp_diff">
+                                    <p class="zero_text">{{ "%.2f"|format(expected[i][0][j]) }}</p>
+                                    <p class="zero_text">{{ "%.2f"|format(actual[i][j]) }}</p>
+                                    <p class="zero_text">({{ "%+.2f"|format(diff[i][j]) }})</p>
+                                </div>
+                            {% endfor %}
+                            <p class="zero_text">{{ expected[i][1] }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="team_expected">
+                    {%  for i in range(5, 10) %}
+                        <div class="one_player_stats">
+                            {% for j in range(12) %}
+                                <div class="act_exp_diff">
+                                    <p class="zero_text">{{ "%.2f"|format(expected[i][0][j]) }}</p>
+                                    <p class="zero_text">{{ "%.2f"|format(actual[i][j]) }}</p>
+                                    <p class="zero_text">({{ "%+.2f"|format(diff[i][j]) }})</p>
+                                </div>
+                            {% endfor %}
+                            <p class="zero_text">{{ expected[i][1] }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     {% endif %}

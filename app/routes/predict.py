@@ -1,10 +1,12 @@
+import numpy as np
 import requests
 from flask import Blueprint, render_template, request, current_app, stream_with_context
 from app.decorators.api_response import api
 from app.core.predict import predict, get_account_info, make_path
 from app.core.update import update
 from app.core.get_account_info import get_all_mastery, get_rank_info, determine_level_image, get_info_by_ign
-from app.core.get_match_info import check_if_in_game, calculate_game_time, get_live_match, get_match_by_id
+from app.core.get_match_info import check_if_in_game, calculate_game_time, get_live_match, get_match_by_id,\
+    format_expected, process_actual
 from app.imageinfo import imageinfo
 from app.db import db
 from app.db.schemas import PredictInfo, PlayerInfo
@@ -132,6 +134,8 @@ def prof_page(ign):
 
 @router.get("/profile/<ign>/live")
 def live_game(ign):
+    # give it time to create temp file
+    sleep(2)
     try:
         id = get_info_by_ign(ign)["id"]
     except:
@@ -174,9 +178,16 @@ def past_game(gameid):
         data = match["info"]
         if data["queueId"] != 420:
             raise Exception
-        team_1 = data["participants"][:4]
+        team_1 = data["participants"][:5]
         team_2 = data["participants"][5:]
-        return render_template("pastGame.html", team_1=team_1, team_2=team_2, gameid=gameid)
+        expected = format_expected(PredictInfo.query.filter(PredictInfo.match_id == str(gameid)).first().currentStats)
+        expected = [format_expected(x) for x in expected]
+        actual = process_actual(match)
+        diff = [np.array(expected[i][0])-np.array(actual[i]) for i in range(10)]
+        print(expected[0])
+        print(actual)
+        return render_template("pastGame.html", team_1=team_1, team_2=team_2, gameid=gameid, expected=expected,
+                               duration=data["gameDuration"]/60, actual=actual, diff=diff)
     except:
         return render_template("pageNotFound.html")
 

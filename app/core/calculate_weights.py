@@ -10,7 +10,7 @@ def merge_blobs(blobs):
             if k not in res:
                 res[k] = blob[k]
             else:
-                res[k] = [[(res[k][0][i] + blob[k][0][i])/(res[k][1]+1) for i in range(len(blob[k][0]))], res[k][1]+1]
+                res[k] = [[((res[k][0][i] * res[k][1]) + blob[k][0][i])/(res[k][1]+1) for i in range(len(blob[k][0]))], res[k][1]+1]
     return res
 
 
