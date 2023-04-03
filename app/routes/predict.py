@@ -153,21 +153,21 @@ def live_game(ign):
         file = make_path(gameid)
         if file.is_file():
             print("calculating")
-            pending = "calculating"
+            return render_template("calculatingGame.html")
         # check if prediction is pending(ingame)
         elif in_db is not None and in_db.actualWinner == "Pending":
             print("waiting")
             pending = "waiting"
-            snapshot = PredictInfo.query.filter(PredictInfo.match_id == str(gameid)).first().currentStats
+            team_1 = match["participants"][:4]
+            team_2 = match["participants"][5:]
+            snapshot = format_expected(PredictInfo.query.filter(PredictInfo.match_id == str(gameid)).first().currentStats)
+            snapshot = [format_expected(x) for x in snapshot]
+            return render_template("liveGame.html", team_1=team_1, team_2=team_2, gameid=gameid, status=pending, ign=ign,
+                                   snapshot=snapshot)
         else:
-            pending = "calculating"
             print("new predict just started calculating")
             predict_live(ign)
-    # todo eye candy stuff based on above values
-    team_1 = match["participants"][:4]
-    team_2 = match["participants"][5:]
-    return render_template("liveGame.html", team_1=team_1, team_2=team_2, gameid=gameid, status=pending, ign=ign,
-                           snapshot=snapshot)
+            return render_template("calculatingGame.html")
 
 
 @router.get("/game/<gameid>")
@@ -184,12 +184,15 @@ def past_game(gameid):
         expected = [format_expected(x) for x in expected]
         actual = process_actual(match)
         diff = [np.array(actual[i]-np.array(expected[i][0])) for i in range(10)]
-        print(len(diff[1]))
         return render_template("pastGame.html", team_1=team_1, team_2=team_2, gameid=gameid, expected=expected,
                                duration=data["gameDuration"]/60, actual=actual, diff=diff)
     except:
         return render_template("pageNotFound.html")
 
+
+@router.get("/about")
+def about():
+    return render_template("about.html")
 
 # todo
 # @router.get("/")

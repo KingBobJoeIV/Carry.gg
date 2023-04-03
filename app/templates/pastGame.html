@@ -7,6 +7,7 @@
 </head>
 <div class="main">
     {% if not live %}
+        Table is in the form: Expected, Actual, Difference
         <div class="game_info">
             <table>
                 <tr>
@@ -45,13 +46,20 @@
                                 <div class="act_exp_diff">
                                     <p class="zero_text">{{ "%.2f"|format(expected[i][0][j]) }}</p>
                                     <p class="zero_text">{{ "%.2f"|format(actual[i][j]) }}</p>
-                                    <p class="zero_text">({{ "%+.2f"|format(diff[i][j]) }})</p>
+                                    <p class="{{ "neg" if diff[i][j] < 0 else "pos"}}">({{ "%+.2f"|format(diff[i][j]) }})</p>
                                 </div>
                             </td>
                         {% endfor %}
                         <td class="zero_text">{{ expected[loop.index0][1] }}</td>
                     </tr>
                 {% endfor %}
+                <tr>
+                    {% for i in range(14) %}
+                        <td>
+                            <div class="block"></div>
+                        </td>
+                    {% endfor %}
+                </tr>
                 {% for player in team_2 %}
                     <tr>
                         <td>
@@ -66,13 +74,13 @@
                                 </div>
                             </div>
                         </td>
-                        {% set i = loop.index0 %}
+                        {% set i = loop.index0 + 5 %}
                         {% for j in range(12) %}
                             <td>
                                 <div class="act_exp_diff">
                                     <p class="zero_text">{{ "%.2f"|format(expected[i][0][j]) }}</p>
                                     <p class="zero_text">{{ "%.2f"|format(actual[i][j]) }}</p>
-                                    <p class="zero_text">({{ "%+.2f"|format(diff[i][j]) }})</p>
+                                    <p class="{{ "neg" if diff[i][j] < 0 else "pos"}}">({{ "%+.2f"|format(diff[i][j]) }})</p>
                                 </div>
                             </td>
                         {% endfor %}

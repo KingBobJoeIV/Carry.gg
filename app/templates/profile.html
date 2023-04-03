@@ -38,7 +38,7 @@
         {% if not hide %}
             {%  if pending == "predict" %}
                 <a href="/predict/profile/{{ ign }}/live" target="_blank">
-                    <button id="predictBtn" type="submit">Predict Live Game!</button>
+                    <button id="predictBtn" type="submit" onclick="changeText()">Predict Live Game!</button>
                 </a>
             {%  else %}
                 <a href="/predict/profile/{{ ign }}/live" target="_blank">
@@ -107,6 +107,11 @@
             document.getElementById("mastery_points").hidden = false;
         }
     }
+
+    function changeText(){
+        document.getElementById("predictBtn").innerHTML = "View Live Game!";
+    }
+
     window.addEventListener( "pageshow", function ( event ) {
         var historyTraversal = event.persisted || ( typeof window.performance != "undefined" && window.performance.navigation.type === 2 );
         if ( historyTraversal ) {

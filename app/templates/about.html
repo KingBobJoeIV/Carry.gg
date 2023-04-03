@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/homeStyles.css"/>
+    <title>About</title>
+</head>
+<body>
+<p>Carry.gg uses Riot Games' API to fetch information about the players in the current game.
+    I look at all matches in the current season and filter by the current champion and role.
+    As I go through these games, I extract relevant information from them and store the aggregate in my database.
+    After doing this for every player in the current match, I input this data into a Logistic Regression model which
+    predicts the probability that a team will win. I then store this prediction in my database and update the result once
+    the game is complete.</p>
+</body>
+</html>
