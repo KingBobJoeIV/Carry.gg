@@ -10,15 +10,14 @@ from pathlib import Path
 from app.internal.caching.response_caching import cache
 import time
 import math
+import requests
 
 
 # todo needs to be updated every patch
 # @cache
 def map_id_to_champ():
-    p=Path("./app/ddragon_13_4_1_champ_data.json").resolve()
-    print(p)
-    f = open(p)
-    data = json.load(f)
+    r = requests.get("https://raw.githubusercontent.com/InFinity54/LoL_DDragon/master/latest/data/en_US/champion.json")
+    data = json.loads(r.text)
     for key in data["data"].keys():
         constants.CHAMPION_MAPPING[int(data["data"][key]["key"])] = data["data"][key]["id"]
 
