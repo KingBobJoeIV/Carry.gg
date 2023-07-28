@@ -1,4 +1,5 @@
 import random
+import requests
 from app.core.constants import SKINS
 
 
@@ -7,176 +8,44 @@ def get_border_by_level(level):
         pass
 
 
-# last updated 10/11/2022
 def skin_info():
-    # todo loop through all urls to test
-    SKINS["Aatrox"] = [20, 21, 0, 1, 11, 2, 3, 7, 8, 9]
-    SKINS["Ahri"] = [42, 65, 66, 0, 1, 14, 15, 16, 17, 2, 27, 28, 3, 4, 5, 6, 7]
-    SKINS["Akali"] = [50, 60, 61, 0, 1, 13, 14, 15, 2, 3, 32, 4, 5, 6, 7, 8, 9]
-    SKINS["Akshan"] = [0, 1, 10]
-    SKINS["Alistar"] = [0, 1, 10, 19, 2, 20, 22, 29, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["Amumu"] = [34, 0, 1, 17, 2, 23, 24, 3, 4, 5, 6, 7, 8]
-    # todo bewitching
-    SKINS["Anivia"] = [27, 0, 1, 17, 2, 3, 4, 5, 6, 7, 8]
-    SKINS["Annie"] = [22, 31, 0, 1, 10, 11, 12, 13, 2, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["Aphelios"] = [18, 20, 0, 1, 9]
-    SKINS["Ashe"] = [32, 43, 0, 1, 11, 17, 2, 23, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["AurelionSol"] = [0, 1, 11, 2]
-    SKINS["Azir"] = [14, 0, 1, 2, 3, 4, 5]
-    SKINS["Bard"] = [17, 0, 1, 5, 6, 8]
-    SKINS["Belveth"] = [0, 1]
-    SKINS["Blitzcrank"] = [36, 47, 0, 1, 11, 2, 20, 21, 22, 29, 3, 4, 5, 6, 7]
-    SKINS["Brand"] = [21, 22, 0, 1, 2, 3, 4, 5, 6, 7, 8]
-    SKINS["Braum"] = [33, 0, 1, 10, 11, 2, 24, 3]
-    SKINS["Caitlyn"] = [28, 29, 30, 0, 1, 10, 11, 13, 19, 2, 20, 22, 3, 4, 5, 6]
-    SKINS["Camille"] = [11, 21, 0, 1, 10, 2]
-    # todo bewitching
-    SKINS["Cassiopeia"] = [18, 0, 1, 2, 3, 4, 8, 9]
-    SKINS["Chogath"] = [0, 1, 14, 2, 3, 4, 5, 6, 7]
-    SKINS["Corki"] = [26, 0, 1, 18, 2, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["Darius"] = [33, 43, 0, 1, 14, 15, 16, 2, 24, 3, 4, 8]
-    SKINS["Diana"] = [27, 37, 0, 1, 11, 12, 18, 2, 25, 26, 3]
-    SKINS["DrMundo"] = [0, 1, 10, 2, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["Draven"] = [29, 39, 0, 1, 12, 13, 2, 20, 3, 4, 5, 6]
-    SKINS["Ekko"] = [36, 45, 46, 0, 1, 11, 12, 19, 2, 28, 3]
-    SKINS["Elise"] = [15, 0, 1, 2, 3, 4, 5, 6]
-    SKINS["Evelynn"] = [24, 31, 32, 0, 1, 15, 2, 3, 4, 5, 6, 7, 8]
-    SKINS["Ezreal"] = [25, 0, 1, 18, 19, 2, 20, 21, 22, 23, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["Fiddlesticks"] = [27, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["Fiora"] = [60, 0, 1, 2, 22, 23, 3, 31, 4, 41, 5, 50, 51]
-    SKINS["Fizz"] = [25, 0, 1, 10, 14, 15, 16, 2, 3, 4, 8, 9]
-    SKINS["Galio"] = [0, 1, 13, 19, 2, 3, 4, 5, 6]
-    SKINS["Gangplank"] = [23, 0, 1, 14, 2, 21, 3, 4, 5, 6, 7, 8]
-    SKINS["Garen"] = [0, 1, 10, 11, 13, 14, 2, 22, 23, 24, 3, 4, 5, 6]
-    SKINS["Gnar"] = [22, 0, 1, 13, 14, 15, 2, 3, 4]
-    SKINS["Gragas"] = [0, 1, 10, 11, 2, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["Graves"] = [35, 42, 0, 1, 14, 18, 2, 25, 3, 4, 5, 6, 7]
-    SKINS["Gwen"] = [11, 0, 1]
-    SKINS["Hecarim"] = [22, 0, 1, 14, 2, 3, 4, 5, 6, 7, 8]
-    SKINS["Heimerdinger"] = [24, 0, 1, 15, 2, 3, 4, 5, 6]
-    SKINS["Illaoi"] = [18, 0, 1, 10, 2]
-    SKINS["Irelia"] = [26, 36, 0, 1, 15, 16, 17, 18, 2, 3, 4, 5, 6]
-    SKINS["Ivern"] = [0, 1, 11, 2]
-    SKINS["Janna"] = [36, 45, 46, 0, 1, 13, 2, 20, 27, 3, 4, 5, 6, 7, 8]
-    SKINS["JarvanIV"] = [30, 0, 1, 11, 2, 21, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["Jax"] = [20, 21, 0, 1, 12, 13, 14, 2, 3, 4, 5, 6, 7, 8]
-    SKINS["Jayce"] = [24, 25, 0, 1, 15, 2, 3, 4, 5]
-    SKINS["Jhin"] = [23, 0, 1, 14, 2, 3, 4, 5]
-    SKINS["Jinx"] = [37, 38, 40, 0, 1, 12, 13, 2, 20, 29, 3, 4]
-    SKINS["Kaisa"] = [29, 39, 40, 0, 1, 14, 15, 16, 17, 26, 27]
-    SKINS["Kalista"] = [0, 1, 2, 3, 4, 5]
-    SKINS["Karma"] = [44, 0, 1, 19, 2, 26, 27, 3, 4, 5, 6, 7, 8]
-    SKINS["Karthus"] = [17, 0, 1, 10, 2, 3, 4, 5, 9]
-    SKINS["Kassadin"] = [15, 0, 1, 14, 2, 3, 4, 5, 6]
-    SKINS["Katarina"] = [37, 0, 1, 10, 12, 2, 21, 29, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["Kayle"] = [33, 42, 0, 1, 15, 2, 24, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["Kayn"] = [15, 8, 9, 0, 1, 2]
-    SKINS["Kennen"] = [23, 0, 1, 2, 3, 4, 5, 6, 7, 8]
-    SKINS["Khazix"] = [0, 1, 11, 2, 3, 4, 60]
-    SKINS["Kindred"] = [12, 0, 1, 2, 3]
-    SKINS["Kled"] = [0, 1, 2, 9]
-    SKINS["Kogmaw"] = [37, 0, 1, 10, 19, 2, 28, 3, 4, 5, 6, 7, 8, 9]
-    # todo bewitching
-    SKINS["Leblanc"] = [33, 35, 0, 1, 12, 19, 2, 20, 29, 3, 4, 5]
-    SKINS["LeeSin"] = [39, 41, 0, 1, 10, 11, 12, 2, 27, 28, 29, 3, 31, 4, 5, 6]
-    SKINS["Leona"] = [22, 33, 34, 0, 1, 10, 11, 12, 2, 21, 23, 3, 4, 8, 9]
-    SKINS["Lillia"] = [10, 0, 1]
-    SKINS["Lissandra"] = [23, 0, 1, 12, 2, 3, 4]
-    SKINS["Lucian"] = [31, 40, 0, 1, 18, 19, 2, 25, 6, 7, 8, 9]
-    SKINS["Lulu"] = [37, 0, 1, 14, 15, 2, 26, 27, 3, 4, 5, 6]
-    SKINS["Lux"] = [29, 39, 40, 0, 1, 14, 15, 16, 17, 18, 19, 2, 3, 4, 5, 6, 7, 8]
-    SKINS["Malphite"] = [27, 0, 1, 16, 2, 23, 24, 25, 3, 4, 5, 6, 7]
-    # todo honor skin
-    SKINS["Malzahar"] = [28, 0, 1, 18, 2, 3, 4, 5, 6, 7, 9]
-    SKINS["Maokai"] = [24, 0, 1, 16, 2, 3, 4, 5, 6, 7]
-    SKINS["MasterYi"] = [42, 52, 53, 0, 1, 10, 11, 17, 2, 24, 3, 33, 4, 5, 9]
-    SKINS["MissFortune"] = [21, 31, 33, 0, 1, 15, 16, 17, 18, 2, 20, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["MonkeyKing"] = [0, 1, 2, 3, 4, 5, 6, 7]
-    SKINS["Mordekaiser"] = [13, 23, 32, 0, 1, 2, 3, 4, 5, 6]
-    SKINS["Morgana"] = [39, 41, 50, 0, 1, 10, 11, 17, 2, 26, 3, 4, 5, 6]
-    SKINS["Nami"] = [32, 0, 1, 15, 2, 24, 3, 7, 8, 9]
-    SKINS["Nasus"] = [35, 0, 1, 10, 11, 16, 2, 25, 3, 4, 5, 6]
-    SKINS["Nautilus"] = [18, 0, 1, 2, 3, 4, 5, 6, 9]
-    # todo bewitching
-    SKINS["Neeko"] = [21, 0, 1, 10, 11, 12]
-    SKINS["Nidalee"] = [27, 29, 0, 1, 11, 18, 2, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["Nilah"] = [0, 1]
-    SKINS["Nocturne"] = [0, 1, 16, 2, 3, 4, 5, 6, 7]
-    SKINS["Nunu"] = [26, 0, 1, 16, 2, 3, 4, 5, 6, 7, 8]
-    SKINS["Olaf"] = [25, 35, 0, 1, 15, 16, 2, 3, 4, 5, 6]
-    SKINS["Orianna"] = [20, 0, 1, 11, 2, 3, 4, 5, 6, 7, 8]
-    SKINS["Ornn"] = [0, 1, 2]
-    SKINS["Pantheon"] = [25, 26, 36, 0, 1, 16, 2, 3, 4, 5, 6, 7, 8]
-    SKINS["Poppy"] = [24, 0, 1, 14, 15, 16, 2, 3, 4, 5, 6, 7]
-    SKINS["Pyke"] = [34, 44, 0, 1, 16, 25, 9]
-    SKINS["Qiyana"] = [20, 21, 0, 1, 10, 11, 2]
-    SKINS["Quinn"] = [14, 0, 1, 2, 3, 4, 5]
-    SKINS["Rakan"] = [18, 0, 1, 2, 3, 4, 5, 9]
-    SKINS["Rammus"] = [17, 0, 1, 16, 2, 3, 4, 5, 6, 7, 8]
-    SKINS["RekSai"] = [17, 0, 1, 2, 9]
-    SKINS["Rell"] = [10, 0, 1]
-    SKINS["Renata"] = [0, 1, 10]
-    SKINS["Renekton"] = [26, 0, 1, 17, 18, 2, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["Rengar"] = [30, 0, 1, 15, 2, 23, 3, 8]
-    SKINS["Riven"] = [34, 44, 45, 0, 1, 16, 18, 2, 20, 22, 23, 3, 4, 5, 6, 7]
-    SKINS["Rumble"] = [0, 1, 13, 2, 3, 4]
-    SKINS["Ryze"] = [20, 0, 1, 10, 11, 13, 2, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["Samira"] = [20, 0, 1, 10]
-    SKINS["Sejuani"] = [16, 26, 0, 1, 15, 2, 3, 4, 5, 6, 7, 8]
-    # todo bewitching
-    SKINS["Senna"] = [16, 26, 27, 0, 1, 10, 9]
-    SKINS["Seraphine"] = [14, 15, 4, 0, 1, 2, 3]
-    SKINS["Sett"] = [10, 19, 38, 0, 1, 8, 9]
-    SKINS["Shaco"] = [23, 0, 1, 15, 2, 3, 4, 5, 6, 7, 8]
-    SKINS["Shen"] = [40, 0, 1, 15, 16, 2, 22, 3, 4, 5, 6]
-    SKINS["Shyvana"] = [0, 1, 2, 3, 4, 5, 6, 8]
-    SKINS["Singed"] = [0, 1, 10, 2, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["Sion"] = [30, 0, 1, 14, 2, 22, 3, 4, 5]
-    SKINS["Sivir"] = [34, 43, 0, 1, 10, 16, 2, 25, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["Skarner"] = [0, 1, 2, 3, 4, 5]
-    SKINS["Sona"] = [26, 35, 0, 1, 17, 2, 3, 4, 5, 6, 7, 9]
-    SKINS["Soraka"] = [18, 27, 0, 1, 15, 16, 17, 2, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["Swain"] = [0, 1, 11, 12, 2, 3, 4]
-    SKINS["Sylas"] = [13, 14, 24, 34, 0, 1, 8]
-    SKINS["Syndra"] = [25, 34, 44, 0, 1, 16, 2, 3, 4, 5, 6, 7]
-    SKINS["TahmKench"] = [11, 20, 0, 1, 2, 3]
-    SKINS["Taliyah"] = [11, 0, 1, 2, 3]
-    SKINS["Talon"] = [0, 1, 12, 2, 20, 29, 3, 4, 5]
-    SKINS["Taric"] = [0, 1, 2, 3, 4, 9]
-    SKINS["Teemo"] = [37, 0, 1, 14, 18, 2, 25, 27, 3, 4, 5, 6, 7, 8]
-    SKINS["Thresh"] = [27, 28, 38, 0, 1, 13, 14, 15, 17, 2, 3, 4, 5, 6]
-    SKINS["Tristana"] = [40, 41, 51, 0, 1, 10, 11, 12, 2, 24, 3, 33, 4, 5, 6]
-    SKINS["Trundle"] = [12, 0, 1, 2, 3, 4, 5, 6]
-    SKINS["Tryndamere"] = [18, 0, 1, 10, 2, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["TwistedFate"] = [23, 25, 0, 1, 10, 11, 13, 2, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["Twitch"] = [45, 0, 1, 12, 2, 27, 3, 36, 4, 5, 6, 7, 8]
-    SKINS["Udyr"] = [0, 1, 2, 3, 4, 5]
-    SKINS["Urgot"] = [23, 0, 1, 15, 2, 3, 9]
-    SKINS["Varus"] = [16, 34, 0, 1, 17, 2, 3, 4, 5, 6, 7, 9]
-    SKINS["Vayne"] = [25, 32, 33, 0, 1, 10, 11, 12, 13, 14, 15, 2, 3, 4, 5, 6]
-    SKINS["Veigar"] = [32, 41, 0, 1, 13, 2, 23, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["Velkoz"] = [0, 1, 11, 2, 3, 4]
-    SKINS["Vex"] = [0, 1]
-    SKINS["Vi"] = [29, 0, 1, 11, 12, 2, 20, 3, 4, 5]
-    SKINS["Viego"] = [10, 19, 21, 0, 1]
-    SKINS["Viktor"] = [14, 0, 1, 2, 3, 4, 5]
-    SKINS["Vladimir"] = [30, 0, 1, 14, 2, 21, 3, 4, 5, 6, 7, 8]
-    SKINS["Volibear"] = [7, 9, 0, 1, 2, 3, 4, 5, 6]
-    SKINS["Warwick"] = [35, 0, 1, 10, 16, 2, 3, 4, 5, 6, 7, 8, 9]
-    SKINS["Xayah"] = [17, 26, 28, 0, 1, 2, 3, 4, 8]
-    SKINS["Xerath"] = [12, 0, 1, 2, 3, 4, 5]
-    SKINS["XinZhao"] = [36, 0, 1, 13, 2, 20, 27, 3, 4, 5, 6]
-    SKINS["Yasuo"] = [45, 54, 55, 0, 1, 10, 17, 18, 2, 3, 35, 36, 9]
-    SKINS["Yone"] = [19, 26, 0, 1, 10]
-    SKINS["Yorick"] = [21, 30, 0, 1, 12, 2, 3, 4]
-    SKINS["Yuumi"] = [28, 37, 0, 1, 11, 19]
-    SKINS["Zac"] = [0, 1, 2, 6, 7]
-    SKINS["Zed"] = [30, 31, 0, 1, 10, 11, 13, 15, 2, 3]
-    SKINS["Zeri"] = [0, 1, 10]
-    SKINS["Ziggs"] = [24, 0, 1, 14, 2, 23, 3, 4, 5, 6, 7]
-    SKINS["Zilean"] = [0, 1, 2, 3, 4, 5, 6]
-    SKINS["Zoe"] = [20, 0, 1, 18, 19, 2, 9]
-    SKINS["Zyra"] = [16, 0, 1, 2, 3, 4, 5, 6, 7]
+    base_url = "https://api.github.com/repos/"
+    username = "InFinity54"
+    repository = "Lol_DDragon"
+    branch = "master"  # Replace with the desired branch name
+    directory_path = "img/champion/loading/"
+
+    # Step 1: Get the SHA of the latest commit on the specified branch
+    commit_url = f"{base_url}{username}/{repository}/commits/{branch}"
+    response = requests.get(commit_url)
+    if response.status_code == 200:
+        commit_data = response.json()
+        latest_commit_sha = commit_data["sha"]
+    else:
+        print("Error:", response.status_code)
+        exit()
+
+    # Step 2: Get the tree of the latest commit
+    tree_url = f"{base_url}{username}/{repository}/git/trees/{latest_commit_sha}?recursive=1"
+    response = requests.get(tree_url)
+    if response.status_code == 200:
+        tree_data = response.json()
+        files_in_directory = [
+            item["path"] for item in tree_data["tree"] if item["type"] == "blob" and directory_path in item["path"]
+        ]
+    else:
+        print("Error:", response.status_code)
+        exit()
+
+    # Step 3: Filter files that are specifically in the directory
+    files_in_directory = [file_name for file_name in files_in_directory if file_name.startswith(directory_path)]
+
+    # Step 4: Create global mapping
+    for s in files_in_directory:
+        data = s.split("/")[-1].split("_")
+        if data[0] not in SKINS: # champ
+            SKINS[data[0]] = []
+        SKINS[data[0]].append(int(data[1].split(".")[0])) # add the number
 
 
 def randomize_skins_by_champ(name):
