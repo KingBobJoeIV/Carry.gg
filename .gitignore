@@ -136,3 +136,4 @@ app/core/df_test.py
 app/core/rate_limit_test.py
 app/core/temp.json
 data
+node_modules
