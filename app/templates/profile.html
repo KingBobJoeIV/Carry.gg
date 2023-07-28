@@ -22,7 +22,7 @@
             {% else %}
                 <img class="rank_border" src="../../static/images/UNRANKED.png" onclick="changeImage()"/>
             {% endif %}
-            <img class="mastery" id="mastery" src="https://github.com/InFinity54/LoL_DDragon/blob/master/extras/masteries/mastery{{ championLevel }}.png?raw=true" hidden="hidden">
+            <img class="mastery" id="mastery" src="https://github.com/InFinity54/LoL_DDragon/blob/master/extras/masteries/mastery{{ championLevel }}.png?raw=true" hidden="hidden", onclick="changeImage()">
             <p class="mastery_points" id="mastery_points" hidden="hidden">{{ championPoints }}pts</p>
         </div>
         <div class="space"></div>
@@ -93,10 +93,10 @@
                 {%  endfor %}
             </ol>
         </div>
-    </div>
-    <div class="footer">
-        <a href="/predict/about">About</a>
-        <a href="mailto:manas@durgi.net">Contact</a>
+        <div class="footer">
+            <a href="/predict/about">About</a>
+            <a href="mailto:manas@durgi.net">Contact</a>
+        </div>
     </div>
 </body>
 <script>
