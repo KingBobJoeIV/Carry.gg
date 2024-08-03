@@ -13,10 +13,10 @@ def update(ign):
     # todo also add this when getting matches(500)
     except Exception as e:
         print(e)
-        return "notfound"
+        return "notfound", None, None
     # too low level players have no profile
     if me["summonerLevel"] < 30:
-        return "toolow"
+        return "toolow", None, None
     # update in account table
     # todo don't update during a prediction
 

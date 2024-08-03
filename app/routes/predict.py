@@ -74,11 +74,12 @@ def profile_page(ign):
         team2 = []
         for player in players:
             player = player.replace("'", "").replace(" ", "")
-            print(player)
             if count < 5:
-                team1.append(PlayerInfo.query.filter_by(id=player).first().name)
+                info = PlayerInfo.query.filter_by(id=player).first()
+                team1.append(info.name+"-"+info.tagLine)
             else:
-                team2.append(PlayerInfo.query.filter_by(id=player).first().name)
+                info = PlayerInfo.query.filter_by(id=player).first()
+                team2.append(info.name+"-"+info.tagLine)
             count += 1
             color = "#c04840cc"
             if p.actualWinner == "Pending":
