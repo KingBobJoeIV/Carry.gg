@@ -1,7 +1,7 @@
 
 REGION = "AMERICAS"
 MY_REGION = "NA1"
-SZN_START = 1673413200
+SZN_START = 1715745600
 
 # globals
 home = None

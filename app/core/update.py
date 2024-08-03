@@ -8,21 +8,22 @@ from app.core.predict import remove_live, make_path
 def update(ign):
     try:
         account = get_account_info.get_info_by_ign(ign)
+        me = get_account_info.get_summoner_by_riot_acc(account)
     # todo do separate error codes(notfound/servererror)
     # todo also add this when getting matches(500)
     except Exception as e:
-        print(e.__class__)
+        print(e)
         return "notfound"
     # too low level players have no profile
-    if account["summonerLevel"] < 30:
+    if me["summonerLevel"] < 30:
         return "toolow"
     # update in account table
     # todo don't update during a prediction
 
-    get_account_info.store_player_in_db(account["puuid"])
+    get_account_info.store_player_in_db(account, me)
     # select * from predict_info where match_id = live_game_id and puuid contains ‘id’
     # find any pending past prediction games and update status
-    pending = PredictInfo.query.filter(PredictInfo.ids.contains(account["id"])).filter_by(actualWinner="Pending").all()
+    pending = PredictInfo.query.filter(PredictInfo.ids.contains(me["id"])).filter_by(actualWinner="Pending").all()
     for prediction in pending:
         try:
             # get match from riot
@@ -44,4 +45,4 @@ def update(ign):
                 print("e", e)
                 continue
             continue
-    return "ok"
+    return "ok", account, me

@@ -1,6 +1,6 @@
 import numpy as np
 import requests
-from flask import Blueprint, render_template, request, current_app, stream_with_context
+from flask import Blueprint, render_template, request, current_app, stream_with_context, redirect, url_for
 from app.decorators.api_response import api
 from app.core.predict import predict, get_account_info, make_path
 from app.core.update import update
@@ -17,6 +17,10 @@ import app.core.constants
 from pathlib import Path
 from app.imageinfo.imageinfo import skin_info
 router = Blueprint("predict", __name__, url_prefix="/predict")
+
+@router.get("/")
+def redirect_to_home():
+    return redirect(url_for("predict.home_page"))
 
 
 @router.get("/home/riot.txt")
@@ -37,19 +41,18 @@ def profile_page(ign):
     # make sure cache exists
     print("loaded!")
     check_pending()
-    update_info = update(ign)
+    update_msg, account, me = update(ign)
     print("updated!")
-    if update_info == "toolow":
+    if update_msg == "toolow":
         return render_template("unranked.html", ign=ign)
-    elif update_info == "notfound":
+    elif update_msg == "notfound":
         return render_template("pageNotFound.html")
-    elif update_info == "servererror":
+    elif update_msg == "servererror":
         return render_template("500.html")
     hide = False
     pending = ""
-    prof = get_account_info.get_info_by_ign(ign)
     # past/live predictions
-    predictions = PredictInfo.query.filter(PredictInfo.ids.contains(prof["id"])).all()
+    predictions = PredictInfo.query.filter(PredictInfo.ids.contains(me["id"])).all()
     pred = []
     # todo game
     for p in predictions:
@@ -71,6 +74,7 @@ def profile_page(ign):
         team2 = []
         for player in players:
             player = player.replace("'", "").replace(" ", "")
+            print(player)
             if count < 5:
                 team1.append(PlayerInfo.query.filter_by(id=player).first().name)
             else:
@@ -91,12 +95,12 @@ def profile_page(ign):
     for i in range(len(pred)):
         pred[i] = pred[i][1]
     # not in game
-    if not check_if_in_game(prof["id"]):
+    if not check_if_in_game(account["puuid"]):
         hide = True
         print("not ingame")
     # in game
     else:
-        live_id = get_live_match(prof["id"])["gameId"]
+        live_id = get_live_match(account["puuid"])["gameId"]
         in_db = PredictInfo.query.filter(PredictInfo.match_id == str(live_id)).first()
         # check if prediction is pending(calculation)
         file = make_path(live_id)
@@ -110,17 +114,17 @@ def profile_page(ign):
         else:
             pending = "predict"
             print("prediction not started")
-    mastery = get_all_mastery(prof["id"])[0]
+    mastery = get_all_mastery(account["puuid"])[0]
     skin = imageinfo.randomize_skins_by_champ(app.core.constants.CHAMPION_MAPPING[mastery["championId"]])
-    league = get_rank_info(prof["id"])
+    league = get_rank_info(me["id"])
     if not league:
         league = {"tier": "UNRANKED", "rank": "", "leaguePoints": 0, "wins": 0, "losses": 0}
 
     # determine which border image to use
-    level = prof["summonerLevel"]
+    level = me["summonerLevel"]
     img_level = determine_level_image(level)
     print("hide", hide, "pending", pending)
-    return render_template("profile.html", ign=prof["name"], icon=prof["profileIconId"], img_level=img_level,
+    return render_template("profile.html", ign=ign, icon=me["profileIconId"], img_level=img_level,
                            level=level, championName=app.core.constants.CHAMPION_MAPPING[mastery["championId"]], skin=skin,
                            championPoints=mastery["championPoints"], championLevel=mastery["championLevel"],
                            tier=league["tier"], rank=league["rank"], leaguePoints=league["leaguePoints"],
@@ -137,15 +141,15 @@ def live_game(ign):
     # give it time to create temp file
     sleep(2)
     try:
-        id = get_info_by_ign(ign)["id"]
+        puuid = get_info_by_ign(ign)["puuid"]
     except:
         return render_template("pageNotFound.html")
     # not ingame
-    if not check_if_in_game(id):
+    if not check_if_in_game(puuid):
         return render_template("notInGame.html", ign=ign)
     # in game
     else:
-        match = get_live_match(id)
+        match = get_live_match(puuid)
         gameid = match["gameId"]
         print(match)
         in_db = PredictInfo.query.filter(PredictInfo.match_id == str(gameid)).first()
@@ -166,7 +170,7 @@ def live_game(ign):
                                    snapshot=snapshot)
         else:
             print("new predict just started calculating")
-            predict_live(ign)
+            predict_live(match)
             return render_template("calculatingGame.html")
 
 
@@ -207,6 +211,6 @@ def check_pending():
         get_account_info.map_id_to_champ()
 
 
-def predict_live(ign):
-    t = Thread(target=predict, args=(ign, current_app._get_current_object()))
+def predict_live(match):
+    t = Thread(target=predict, args=(match, current_app._get_current_object()))
     t.start()

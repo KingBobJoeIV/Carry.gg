@@ -9,7 +9,7 @@ from . import calculate_weights
 from . import get_match_info
 import time, datetime
 from . import compare_teams
-from .watcher import lol_watcher
+from .watcher import riot_watcher
 from app.db import db
 from app.db.schemas import PredictInfo, PlayerInfo
 from app.internal.roleidentification import pull_data, get_roles
@@ -54,12 +54,9 @@ def remove_live(match):
     os.remove(make_path(match))
 
 
-# predict live game given username
-def predict(ign, app):
+# predict live game given match
+def predict(curr_match, app):
     app.app_context().push()
-    # this is for live game
-    current_id = get_account_info.get_info_by_ign(ign)["id"]
-    curr_match = get_match_info.get_live_match(current_id)
     # check if prediction is already pending
     if not add_to_live(curr_match["gameId"]):
         return
@@ -109,11 +106,11 @@ def predict(ign, app):
         if not info:
             curr = get_account_info.get_info(participant)
             curr["revisionDate"] = constants.SZN_START
-            mastery = get_account_info.get_all_mastery(curr["id"])[0]
+            mastery = get_account_info.get_all_mastery(participant)[0]
             league = get_account_info.get_rank_info(curr["id"])
             if not league:
                 league = []
-            row = PlayerInfo(curr, mastery, league, {}, {})
+            row = PlayerInfo(curr, mastery, league, {}, {}, acc=get_account_info.acc_by_puuid(participant))
             db.session.add(row)
             times[count] = constants.SZN_START
         else:

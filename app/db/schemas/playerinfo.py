@@ -6,6 +6,7 @@ class PlayerInfo(db.Model):
     profileIconId: int = db.Column(db.Integer)
     revisionDate: int = db.Column(db.BIGINT)
     name: str = db.Column(db.TEXT, unique=True, nullable=True)
+    tagLine: str = db.Column(db.TEXT, nullable=False)
     id: str = db.Column(db.TEXT, nullable=False, primary_key=True)
     puuid: str = db.Column(db.TEXT, nullable=False, primary_key=True)
     summonerLevel: int = db.Column(db.Integer)
@@ -20,12 +21,13 @@ class PlayerInfo(db.Model):
     blob: str = db.Column(db.JSON)
     matchlist: str = db.Column(db.JSON)
 
-    def __init__(self, summoner, mastery, league, predict, matches):
+    def __init__(self, summoner, mastery, league, predict, matches, acc):
         self.accountId = summoner["accountId"]
         self.profileIconId = summoner["profileIconId"]
         # replacing with last time update was called (in get_account_info)
         self.revisionDate = summoner["revisionDate"]
-        self.name = summoner["name"]
+        self.name = acc["gameName"]
+        self.tagLine = acc["tagLine"]
         self.id = summoner["id"]
         self.puuid = summoner["puuid"]
         self.summonerLevel = summoner["summonerLevel"]
@@ -54,6 +56,7 @@ class PlayerInfo(db.Model):
             "profileIconId": self.profileIconId,
             "revisionDate": self.revisionDate,
             "name": self.name,
+            "tagLine": self.tagLine,
             "id": self.id,
             "puuid": self.puuid,
             "summonerLevel": self.summonerLevel,

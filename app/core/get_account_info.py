@@ -1,6 +1,6 @@
 import datetime
 from . import constants, get_match_info
-from .watcher import lol_watcher
+from .watcher import lol_watcher, riot_watcher
 from app.db import db
 from app.db.schemas import PlayerInfo
 from sqlalchemy.orm.attributes import flag_modified
@@ -13,7 +13,6 @@ import math
 import requests
 
 
-# todo needs to be updated every patch
 # @cache
 def map_id_to_champ():
     r = requests.get("https://raw.githubusercontent.com/InFinity54/LoL_DDragon/master/latest/data/en_US/champion.json")
@@ -31,7 +30,16 @@ def get_info(puuid):
 
 
 def get_info_by_ign(ign):
-    return lol_watcher.summoner.by_name(constants.MY_REGION, ign)
+    ign, tag_line = ign.split("-")
+    return riot_watcher.account.by_riot_id(constants.REGION, ign, tag_line=tag_line)
+
+
+def acc_by_puuid(puuid):
+    return riot_watcher.account.by_puuid(constants.REGION, puuid)
+
+
+def get_summoner_by_riot_acc(acc):
+    return lol_watcher.summoner.by_puuid(constants.MY_REGION, acc['puuid'])
 
 
 def get_puuid_from_id(id):
@@ -45,35 +53,35 @@ def get_rank_info(summonerId):
             return league
 
 
-def get_mastery_for_champ(summonerId, championId):
-    return lol_watcher.champion_mastery.by_summoner_by_champion(constants.MY_REGION, summonerId, championId)["championPoints"]
+def get_mastery_for_champ(puuid, championId):
+    return lol_watcher.champion_mastery.by_puuid_by_champion(constants.MY_REGION, puuid, championId)["championPoints"]
 
 
-def get_all_mastery(summonerId):
-    return lol_watcher.champion_mastery.by_summoner(constants.MY_REGION, summonerId)
+def get_all_mastery(puuid):
+    return lol_watcher.champion_mastery.by_puuid(constants.MY_REGION, puuid)
 
 
-def store_player_in_db(puuid):
-    curr = get_info(puuid)
-    print("storing:", curr["name"], "started at", str(datetime.datetime.fromtimestamp(time.time())))
+def store_player_in_db(account, me):
+    puuid = account["puuid"]
+    print("storing:", account["gameName"], "started at", str(datetime.datetime.fromtimestamp(time.time())))
     # replace revisionDate with current time
-    curr["revisionDate"] = math.floor(time.time())
+    me["revisionDate"] = math.floor(time.time())
     # check to see if account is already stored in db
     info = PlayerInfo.query.filter_by(puuid=puuid).first()
     # create a new row for the account
     if not info:
-        mastery = get_all_mastery(curr["id"])[0]
-        league = get_rank_info(curr["id"])
+        mastery = get_all_mastery(puuid)[0]
+        league = get_rank_info(me["id"])
         if not league:
             league = []
-        row = PlayerInfo(curr, mastery, league, {}, {})
+        row = PlayerInfo(me, mastery, league, {}, {}, account)
         db.session.add(row)
         db.session.commit()
-        print("new row created for:", curr["name"], "finished at:", str(datetime.datetime.fromtimestamp(time.time())))
+        print("new row created for:", account["gameName"], "finished at:", str(datetime.datetime.fromtimestamp(time.time())))
     # if it has been at least 2 minutes since last update, update info
-    elif curr["revisionDate"] - info.revisionDate > 120:
-        mastery = get_all_mastery(curr["id"])[0]
-        league = get_rank_info(curr["id"])
+    elif me["revisionDate"] - info.revisionDate > 120:
+        mastery = get_all_mastery(puuid)[0]
+        league = get_rank_info(me["id"])
         if league:
             setattr(info, "tier", league["tier"])
             setattr(info, "rank", league["rank"])
@@ -88,15 +96,15 @@ def store_player_in_db(puuid):
         setattr(info, "championId", mastery["championId"])
         setattr(info, "championPoints", mastery["championPoints"])
         setattr(info, "championLevel", mastery["championLevel"])
-        setattr(info, "revisionDate", curr["revisionDate"])
+        setattr(info, "revisionDate", me["revisionDate"])
         flag_modified(info, "championId")
         flag_modified(info, "championPoints")
         flag_modified(info, "championLevel")
         flag_modified(info, "revisionDate")
         db.session.commit()
-        print("Updated:", curr["name"], "finished at:", str(datetime.datetime.fromtimestamp(time.time())))
+        print("Updated:", account["gameName"], "finished at:", str(datetime.datetime.fromtimestamp(time.time())))
     else:
-        print("too soon to update", curr["name"])
+        print("too soon to update", account["gameName"])
     return (info or row).as_json
 
 

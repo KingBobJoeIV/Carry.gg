@@ -115,7 +115,7 @@ def store_blobs_in_db(matchlist, blobs, puuid):
 # generate matchid, blob for given player
 def process_match(match, puuid):
     matchid = match
-    # print("trying to process:", matchid, "started at:", str(datetime.datetime.fromtimestamp(time.time())))
+    print("trying to process:", matchid, "started at:", str(datetime.datetime.fromtimestamp(time.time())))
     match = get_match_by_id(matchid)
     puuids = match["metadata"]["participants"]
     ind = puuids.index(puuid)
@@ -127,7 +127,7 @@ def process_match(match, puuid):
     elif "challenges" not in participants[ind]:
         print("no challenges for:", matchid)
         return {champ_role: [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0]}
-    # print("processed:", matchid, "at:", str(datetime.datetime.fromtimestamp(time.time())))
+    print("processed:", matchid, "at:", str(datetime.datetime.fromtimestamp(time.time())))
     return calculate_weights.create_blob_entry(champ_role, participants[ind], match["info"]["teams"][ind // 5])
 
 
@@ -183,15 +183,14 @@ def join_threads(all_res):
     return final
 
 
-def check_if_in_game(id):
+def check_if_in_game(puuid):
     try:
-        game = lol_watcher.spectator.by_summoner(constants.MY_REGION, id)
+        game = lol_watcher.spectator.by_summoner(constants.MY_REGION, puuid)
         # need to check if it's ranked
         if game["gameQueueConfigId"] != 420:
             return False
         return True
     except Exception as e:
-        print(e)
         return False
 
 
